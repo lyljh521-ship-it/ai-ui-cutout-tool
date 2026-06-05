@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI UI 抠图拆分工具</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <h1>AI UI 抠图拆分工具</h1>
+            <p>上传纯色背景 UI 截图，自动拆出控件并导出真正透明 PNG。</p>
+          </div>
+          <div class="actions">
+            <button class="icon-button" id="sampleBtn" type="button" title="使用示例">
+              <span aria-hidden="true">◎</span>
+            </button>
+            <button class="text-button" id="backupBtn" type="button">保存稳定版</button>
+            <button class="primary-button" id="downloadAllBtn" type="button" disabled>下载全部</button>
+          </div>
+        </header>
+
+        <section class="drop-zone" id="dropZone">
+          <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" />
+          <div class="drop-copy">
+            <strong>上传纯色背景 UI 图，直接拆分</strong>
+            <span>单张绿底/蓝底/白底界面可直接控件级拆分；再补第 2 张不同底色图时可更精确还原半透明颜色。</span>
+          </div>
+        </section>
+
+        <section class="stage-wrap">
+          <canvas id="mainCanvas" width="1280" height="720"></canvas>
+          <div class="empty-state" id="emptyState">等待上传图片</div>
+        </section>
+
+        <section class="prep-panel">
+          <div class="prep-head">
+            <div>
+              <h2>复杂背景转双底色</h2>
+              <p>上传非纯色背景图，使用融合换底生成绿色版和洋红版，不输出抠图边缘。</p>
+            </div>
+            <button class="text-button" id="sendPrepBtn" type="button" disabled>送去拆分</button>
+          </div>
+
+          <div class="prep-grid">
+            <label class="prep-upload">
+              <input id="prepFileInput" type="file" accept="image/png,image/jpeg,image/webp" />
+              <span>上传复杂背景图</span>
+            </label>
+
+            <label class="prep-upload">
+              <input id="pairedFileInput" type="file" accept="image/png,image/jpeg,image/webp" />
+              <span>上传左右双底色图</span>
+            </label>
+
+            <label class="prep-upload">
+              <input id="pairedVerticalFileInput" type="file" accept="image/png,image/jpeg,image/webp" />
+              <span>上传上下双底色图</span>
+            </label>
+
+            <label class="field">
+              <span>换底模式</span>
+              <select class="file-field" id="prepMode">
+                <option value="locked" selected>像素锁定</option>
+                <option value="fused">融合换底</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>背景识别 <b id="prepToleranceValue">34</b></span>
+              <input id="prepTolerance" type="range" min="8" max="120" value="34" />
+            </label>
+
+            <label class="field">
+              <span>融合过渡 <b id="prepFeatherValue">42</b></span>
+              <input id="prepFeather" type="range" min="0" max="100" value="42" />
+            </label>
+          </div>
+
+          <div class="prep-results">
+            <article class="prep-card checker">
+              <canvas id="prepMaskCanvas" width="360" height="360"></canvas>
+              <span>背景识别预览</span>
+            </article>
+            <article class="prep-card">
+              <canvas id="prepGreenCanvas" width="360" height="360"></canvas>
+              <button id="downloadPrepGreenBtn" type="button" disabled>下载绿色版</button>
+            </article>
+            <article class="prep-card">
+              <canvas id="prepMagentaCanvas" width="360" height="360"></canvas>
+              <button id="downloadPrepMagentaBtn" type="button" disabled>下载洋红版</button>
+            </article>
+          </div>
+        </section>
+      </section>
+
+      <aside class="side-panel">
+        <section class="control-group">
+          <div class="group-head">
+            <h2>识别设置</h2>
+            <button class="text-button" id="processBtn" type="button" disabled>重新拆分</button>
+          </div>
+
+          <label class="field">
+            <span>第 1 张背景颜色</span>
+            <div class="color-row">
+              <input id="bgColor" type="color" value="#14d81a" />
+              <button id="pickBgBtn" type="button">自动识别</button>
+            </div>
+          </label>
+
+          <label class="field">
+            <span>第 2 张纯色背景 UI 图</span>
+            <input class="file-field" id="secondFileInput" type="file" accept="image/png,image/jpeg,image/webp" />
+          </label>
+
+          <button class="primary-button wide-button" id="aiSecondBgBtn" type="button" disabled>
+            AI 生成第 2 底色并拆分
+          </button>
+
+          <label class="field">
+            <span>第 2 张背景颜色</span>
+            <div class="color-row">
+              <input id="secondBgColor" type="color" value="#ff00ff" />
+              <button id="pickSecondBgBtn" type="button">自动识别</button>
+            </div>
+          </label>
+
+          <div class="status-line" id="solveStatus">当前：单图估算，半透明区域可能偏色</div>
+
+          <label class="field">
+            <span>容差 <b id="toleranceValue">42</b></span>
+            <input id="tolerance" type="range" min="4" max="110" value="42" />
+          </label>
+
+          <label class="field">
+            <span>边缘柔化 <b id="softnessValue">22</b></span>
+            <input id="softness" type="range" min="0" max="80" value="22" />
+          </label>
+
+          <label class="field">
+            <span>去绿污染 <b id="despillValue">90</b></span>
+            <input id="despill" type="range" min="0" max="100" value="90" />
+          </label>
+
+          <label class="field">
+            <span>最小元素面积 <b id="minAreaValue">320</b></span>
+            <input id="minArea" type="range" min="40" max="5000" value="320" />
+          </label>
+
+          <label class="field">
+            <span>拆分粒度</span>
+            <select class="file-field" id="splitMode">
+              <option value="controls" selected>控件级</option>
+              <option value="parts">细图素</option>
+            </select>
+          </label>
+
+          <label class="check-row">
+            <input id="keepShadows" type="checkbox" checked />
+            <span>保留半透明阴影和光效，并还原控件原色</span>
+          </label>
+
+          <div class="status-line">
+            单张纯色图适合快速拆分；半透明颜色要准确，请使用左右/上下双底色图。
+          </div>
+        </section>
+
+        <section class="control-group result-group">
+          <div class="group-head">
+            <h2>拆分结果</h2>
+            <span id="countBadge">0 个</span>
+          </div>
+          <div class="asset-grid" id="assetGrid"></div>
+        </section>
+      </aside>
+    </main>
+
+    <template id="assetTemplate">
+      <article class="asset-card">
+        <div class="checker preview-box">
+          <img alt="" />
+        </div>
+        <div class="asset-meta">
+          <span></span>
+          <button type="button">下载</button>
+        </div>
+      </article>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
