@@ -22,11 +22,8 @@ const els = {
   processBtn: document.querySelector("#processBtn"),
   aiSecondBgBtn: document.querySelector("#aiSecondBgBtn"),
   downloadAllBtn: document.querySelector("#downloadAllBtn"),
-  backupBtn: document.querySelector("#backupBtn"),
-  sampleBtn: document.querySelector("#sampleBtn"),
   prepFileInput: document.querySelector("#prepFileInput"),
-  pairedFileInput: document.querySelector("#pairedFileInput"),
-  pairedVerticalFileInput: document.querySelector("#pairedVerticalFileInput"),
+  pairedAutoFileInput: document.querySelector("#pairedAutoFileInput"),
   prepMode: document.querySelector("#prepMode"),
   prepTolerance: document.querySelector("#prepTolerance"),
   prepToleranceValue: document.querySelector("#prepToleranceValue"),
@@ -43,6 +40,9 @@ const els = {
   assetTemplate: document.querySelector("#assetTemplate"),
 };
 
+const ACCESS_PASSWORD = "ui-cutout-2026";
+const ACCESS_KEY = "ai_ui_cutout_access_ok";
+
 const ctx = els.mainCanvas.getContext("2d", { willReadFrequently: true });
 let sourceImage = null;
 let secondImage = null;
@@ -52,6 +52,40 @@ let sourceName = "ui";
 let assets = [];
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+function setupAccessGate() {
+  if (localStorage.getItem(ACCESS_KEY) === "1") return;
+
+  const gate = document.createElement("section");
+  gate.className = "access-gate";
+  gate.innerHTML = `
+    <form class="access-box">
+      <h2>访问验证</h2>
+      <p>请输入访问密码后继续使用。</p>
+      <input type="password" autocomplete="current-password" placeholder="访问密码" />
+      <button type="submit">进入网站</button>
+      <span class="access-error" aria-live="polite"></span>
+    </form>
+  `;
+  document.body.append(gate);
+
+  const form = gate.querySelector("form");
+  const input = gate.querySelector("input");
+  const error = gate.querySelector(".access-error");
+  input.focus();
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (input.value === ACCESS_PASSWORD) {
+      localStorage.setItem(ACCESS_KEY, "1");
+      gate.remove();
+      return;
+    }
+    error.textContent = "密码不正确";
+    input.value = "";
+    input.focus();
+  });
+}
 
 function hexToRgb(hex) {
   const value = hex.replace("#", "");
@@ -316,6 +350,109 @@ function loadPairedVerticalImageFromFile(file) {
     processImage();
   };
   image.src = url;
+}
+
+function loadPairedAutoImageFromFile(file) {
+  const url = URL.createObjectURL(file);
+  const image = new Image();
+  image.onload = async () => {
+    URL.revokeObjectURL(url);
+    const width = image.naturalWidth || image.width;
+    const height = image.naturalHeight || image.height;
+    const pairedLayout = detectPairedLayout(image, width, height);
+    const isHorizontalPair = pairedLayout.orientation === "horizontal";
+    const greenCanvas = document.createElement("canvas");
+    const magentaCanvas = document.createElement("canvas");
+
+    if (isHorizontalPair) {
+      const halfWidth = Math.floor(width / 2);
+      greenCanvas.width = halfWidth;
+      greenCanvas.height = height;
+      magentaCanvas.width = halfWidth;
+      magentaCanvas.height = height;
+      const firstCanvas = pairedLayout.greenFirst ? greenCanvas : magentaCanvas;
+      const secondCanvas = pairedLayout.greenFirst ? magentaCanvas : greenCanvas;
+      firstCanvas.getContext("2d").drawImage(image, 0, 0, halfWidth, height, 0, 0, halfWidth, height);
+      secondCanvas.getContext("2d").drawImage(image, halfWidth, 0, halfWidth, height, 0, 0, halfWidth, height);
+    } else {
+      const halfHeight = Math.floor(height / 2);
+      greenCanvas.width = width;
+      greenCanvas.height = halfHeight;
+      magentaCanvas.width = width;
+      magentaCanvas.height = halfHeight;
+      const firstCanvas = pairedLayout.greenFirst ? greenCanvas : magentaCanvas;
+      const secondCanvas = pairedLayout.greenFirst ? magentaCanvas : greenCanvas;
+      firstCanvas.getContext("2d").drawImage(image, 0, 0, width, halfHeight, 0, 0, width, halfHeight);
+      secondCanvas.getContext("2d").drawImage(image, 0, halfHeight, width, halfHeight, 0, 0, width, halfHeight);
+    }
+
+    const [greenImage, magentaImage] = await Promise.all([loadDataUrlImage(greenCanvas.toDataURL("image/png")), loadDataUrlImage(magentaCanvas.toDataURL("image/png"))]);
+    sourceName = file.name.replace(/\.[^.]+$/, "") || "paired_ui";
+    secondImage = magentaImage;
+    els.bgColor.value = "#00ff00";
+    els.secondBgColor.value = "#ff00ff";
+    setSource(greenImage);
+    autoPickSecondBackground();
+    processImage();
+  };
+  image.src = url;
+}
+
+function detectPairedLayout(image, width, height) {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const canvasCtx = canvas.getContext("2d", { willReadFrequently: true });
+  canvasCtx.drawImage(image, 0, 0);
+  const data = canvasCtx.getImageData(0, 0, width, height).data;
+  const left = sampleRegion(data, width, 0, 0, Math.floor(width / 2), height);
+  const right = sampleRegion(data, width, Math.floor(width / 2), 0, Math.floor(width / 2), height);
+  const top = sampleRegion(data, width, 0, 0, width, Math.floor(height / 2));
+  const bottom = sampleRegion(data, width, 0, Math.floor(height / 2), width, Math.floor(height / 2));
+  const horizontalScore = pairColorScore(left, right);
+  const verticalScore = pairColorScore(top, bottom);
+
+  if (Math.abs(horizontalScore - verticalScore) > 0.06) {
+    const orientation = horizontalScore > verticalScore ? "horizontal" : "vertical";
+    const first = orientation === "horizontal" ? left : top;
+    return { orientation, greenFirst: chromaScore(first, "green") >= chromaScore(first, "magenta") };
+  }
+  const orientation = width >= height * 1.35 ? "horizontal" : "vertical";
+  const first = orientation === "horizontal" ? left : top;
+  return { orientation, greenFirst: chromaScore(first, "green") >= chromaScore(first, "magenta") };
+}
+
+function sampleRegion(data, imageWidth, startX, startY, width, height) {
+  const stepX = Math.max(1, Math.floor(width / 32));
+  const stepY = Math.max(1, Math.floor(height / 32));
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  let count = 0;
+  for (let y = startY; y < startY + height; y += stepY) {
+    for (let x = startX; x < startX + width; x += stepX) {
+      const i = (y * imageWidth + x) * 4;
+      r += data[i];
+      g += data[i + 1];
+      b += data[i + 2];
+      count += 1;
+    }
+  }
+  return { r: r / count, g: g / count, b: b / count };
+}
+
+function pairColorScore(a, b) {
+  const greenMagentaA = chromaScore(a, "green") + chromaScore(b, "magenta");
+  const greenMagentaB = chromaScore(a, "magenta") + chromaScore(b, "green");
+  return Math.max(greenMagentaA, greenMagentaB);
+}
+
+function chromaScore(color, type) {
+  const total = Math.max(1, color.r + color.g + color.b);
+  if (type === "green") {
+    return clamp((color.g - Math.max(color.r, color.b)) / 255, 0, 1) + color.g / total;
+  }
+  return clamp((Math.min(color.r, color.b) - color.g) / 255, 0, 1) + (color.r + color.b) / (total * 2);
 }
 
 function estimateEdgeBackground(imageData) {
@@ -1168,14 +1305,9 @@ els.prepFileInput.addEventListener("change", (event) => {
   if (file) loadPrepImageFromFile(file);
 });
 
-els.pairedFileInput.addEventListener("change", (event) => {
+els.pairedAutoFileInput.addEventListener("change", (event) => {
   const [file] = event.target.files;
-  if (file) loadPairedImageFromFile(file);
-});
-
-els.pairedVerticalFileInput.addEventListener("change", (event) => {
-  const [file] = event.target.files;
-  if (file) loadPairedVerticalImageFromFile(file);
+  if (file) loadPairedAutoImageFromFile(file);
 });
 
 els.secondFileInput.addEventListener("change", (event) => {
@@ -1193,8 +1325,6 @@ els.pickSecondBgBtn.addEventListener("click", () => {
 });
 els.processBtn.addEventListener("click", processImage);
 els.downloadAllBtn.addEventListener("click", downloadAll);
-els.backupBtn.addEventListener("click", backupStableVersion);
-els.sampleBtn.addEventListener("click", createSample);
 els.keepShadows.addEventListener("change", processImage);
 els.splitMode.addEventListener("change", processImage);
 els.downloadPrepGreenBtn.addEventListener("click", () => {
@@ -1229,4 +1359,5 @@ els.sendPrepBtn.addEventListener("click", async () => {
 });
 
 els.bgColor.addEventListener("input", processImage);
+setupAccessGate();
 updateLabels();

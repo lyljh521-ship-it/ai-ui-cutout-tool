@@ -15,10 +15,6 @@
             <p>上传纯色背景 UI 截图，自动拆出控件并导出真正透明 PNG。</p>
           </div>
           <div class="actions">
-            <button class="icon-button" id="sampleBtn" type="button" title="使用示例">
-              <span aria-hidden="true">◎</span>
-            </button>
-            <button class="text-button" id="backupBtn" type="button">保存稳定版</button>
             <button class="primary-button" id="downloadAllBtn" type="button" disabled>下载全部</button>
           </div>
         </header>
@@ -39,29 +35,24 @@
         <section class="prep-panel">
           <div class="prep-head">
             <div>
-              <h2>复杂背景转双底色</h2>
-              <p>上传非纯色背景图，使用融合换底生成绿色版和洋红版，不输出抠图边缘。</p>
+              <h2>AI 双底色图导入</h2>
+              <p>将 AI 生成的绿底/洋红底合图上传到这里，网站会自动判断左右或上下并裁分拆解。</p>
             </div>
             <button class="text-button" id="sendPrepBtn" type="button" disabled>送去拆分</button>
           </div>
 
           <div class="prep-grid">
-            <label class="prep-upload">
+            <label class="prep-upload hidden-control">
               <input id="prepFileInput" type="file" accept="image/png,image/jpeg,image/webp" />
               <span>上传复杂背景图</span>
             </label>
 
             <label class="prep-upload">
-              <input id="pairedFileInput" type="file" accept="image/png,image/jpeg,image/webp" />
-              <span>上传左右双底色图</span>
+              <input id="pairedAutoFileInput" type="file" accept="image/png,image/jpeg,image/webp" />
+              <span>上传双底色图</span>
             </label>
 
-            <label class="prep-upload">
-              <input id="pairedVerticalFileInput" type="file" accept="image/png,image/jpeg,image/webp" />
-              <span>上传上下双底色图</span>
-            </label>
-
-            <label class="field">
+            <label class="field hidden-control">
               <span>换底模式</span>
               <select class="file-field" id="prepMode">
                 <option value="locked" selected>像素锁定</option>
@@ -69,18 +60,23 @@
               </select>
             </label>
 
-            <label class="field">
+            <label class="field hidden-control">
               <span>背景识别 <b id="prepToleranceValue">34</b></span>
               <input id="prepTolerance" type="range" min="8" max="120" value="34" />
             </label>
 
-            <label class="field">
+            <label class="field hidden-control">
               <span>融合过渡 <b id="prepFeatherValue">42</b></span>
               <input id="prepFeather" type="range" min="0" max="100" value="42" />
             </label>
           </div>
 
-          <div class="prep-results">
+          <div class="ai-note">
+            <strong>推荐流程</strong>
+            <span>先用 AI 生成一张绿底/洋红底合图，再上传“上传双底色图”。大界面优先生成两张同尺寸图，或分区域生成后再合成，避免缩放压缩。</span>
+          </div>
+
+          <div class="prep-results hidden-control">
             <article class="prep-card checker">
               <canvas id="prepMaskCanvas" width="360" height="360"></canvas>
               <span>背景识别预览</span>
@@ -159,12 +155,12 @@
             </select>
           </label>
 
-          <label class="check-row">
+          <label class="check-row hidden-control">
             <input id="keepShadows" type="checkbox" checked />
             <span>保留半透明阴影和光效，并还原控件原色</span>
           </label>
 
-          <div class="status-line">
+          <div class="status-line hidden-control">
             单张纯色图适合快速拆分；半透明颜色要准确，请使用左右/上下双底色图。
           </div>
         </section>
