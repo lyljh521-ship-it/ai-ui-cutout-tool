@@ -1,0 +1,1 @@
+window.AI_UI_CUTOUT_API_BASE_URL = "";

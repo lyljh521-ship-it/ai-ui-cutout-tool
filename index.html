@@ -7,12 +7,17 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <main class="app-shell">
+    <nav class="page-tabs">
+      <button class="tab-button is-active" id="cutoutTabBtn" type="button">图素拆分</button>
+      <button class="tab-button" id="prepareTabBtn" type="button">界面抠图</button>
+    </nav>
+
+    <main class="app-shell" id="cutoutPage">
       <section class="workspace">
         <header class="topbar">
           <div>
             <h1>AI UI 抠图拆分工具</h1>
-            <p>上传纯色背景 UI 截图，自动拆出控件并导出真正透明 PNG。</p>
+            <p>上传UI截图，生成透明PNG。</p>
           </div>
           <div class="actions">
             <button class="primary-button" id="downloadAllBtn" type="button" disabled>下载全部</button>
@@ -21,7 +26,7 @@
 
         <section class="drop-zone" id="dropZone">
           <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" />
-          <div class="drop-copy">
+          <div class="drop-copy compact-drop-copy">
             <strong>上传纯色背景 UI 图，直接拆分</strong>
             <span>单张绿底/蓝底/白底界面可直接控件级拆分；再补第 2 张不同底色图时可更精确还原半透明颜色。</span>
           </div>
@@ -32,7 +37,7 @@
           <div class="empty-state" id="emptyState">等待上传图片</div>
         </section>
 
-        <section class="prep-panel">
+        <section class="prep-panel hidden-control">
           <div class="prep-head">
             <div>
               <h2>AI 双底色图导入</h2>
@@ -94,7 +99,7 @@
       </section>
 
       <aside class="side-panel">
-        <section class="control-group">
+        <section class="control-group hidden-control">
           <div class="group-head">
             <h2>识别设置</h2>
             <button class="text-button" id="processBtn" type="button" disabled>重新拆分</button>
@@ -173,7 +178,92 @@
           <div class="asset-grid" id="assetGrid"></div>
         </section>
       </aside>
-    </main>
+  <section id="aiGeneratedDualBgPanel" class="ai-generated-preview-panel" hidden>
+    <div class="ai-generated-preview-head">
+      <div>
+        <h3>AI 生成结果预览</h3>
+        <p>先检查双底色图质量，满意后再送去拆分。</p>
+      </div>
+      <div class="ai-generated-preview-actions">
+        <button type="button" id="downloadAiDualBgBtn">下载生成图</button>
+        <button type="button" id="sendAiDualBgToCutoutBtn">送去拆分</button>
+      </div>
+    </div>
+    <div class="ai-generated-preview-canvas">
+      <img id="aiGeneratedDualBgImage" alt="AI 生成的双底色图预览">
+    </div>
+  </section>
+</main>
+
+    <section class="prepare-page is-hidden" id="preparePage">
+      <header class="prepare-header">
+        <div>
+          <h1>界面抠图</h1>
+          <p class="hidden-control">先从大界面截图中裁出局部资源，再让 AI 生成绿底/洋红底合图，避免整张大图被压缩。</p>
+        </div>
+        <div class="prepare-actions">
+          <button class="primary-button" id="generateDualBgBtn" type="button" disabled>AI抠图</button>
+          <button class="text-button" id="downloadCropBtn" type="button" disabled>下载裁切图</button>
+          <button class="primary-button hidden-control" id="copyPromptBtn" type="button" disabled>复制提示词</button>
+        </div>
+      </header>
+
+      <section class="prepare-layout">
+        <aside class="prepare-controls">
+          <label class="prep-upload full crop-upload-box" id="cropUploadBox">
+            <input id="cropSourceInput" type="file" accept="image/png,image/jpeg,image/webp" />
+            <span id="cropUploadText">上传大界面截图</span>
+            <canvas id="cropCanvas" width="1280" height="720" hidden></canvas>
+            <button class="remove-upload" id="removeCropImageBtn" type="button" hidden>×</button>
+          </label>
+
+          <label class="field">
+            <span>裁切预设</span>
+            <select class="file-field" id="cropPreset">
+              <option value="512x512">512 x 512 图标/头像</option>
+              <option value="768x768">768 x 768 中型图标</option>
+              <option value="1024x512">1024 x 512 宽条特效</option>
+              <option value="1024x768" selected>1024 x 768 横向资源</option>
+              <option value="768x1024">768 x 1024 竖向资源</option>
+            </select>
+          </label>
+
+          <label class="field hidden-control">
+            <span>双底色排列</span>
+            <select class="file-field" id="pairDirection">
+              <option value="auto" selected>自动推荐</option>
+              <option value="horizontal">左右排列</option>
+              <option value="vertical">上下排列</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Liblib AccessKey</span>
+            <input class="file-field" id="liblibAccessKey" type="password" placeholder="本地测试用，不会上传到 GitHub" />
+          </label>
+
+          <label class="field">
+            <span>Liblib SecretKey</span>
+            <input class="file-field" id="liblibSecretKey" type="password" placeholder="本地测试用，不会上传到 GitHub" />
+          </label>
+
+          <label class="field">
+            <span>生成模型</span>
+            <select class="file-field" id="liblibModelMode">
+              <option value="img2img-ultra" selected>Liblib 图生图 Ultra</option>
+            </select>
+          </label>
+
+          <div class="ai-note hidden-control">
+            <strong id="pairAdvice">等待上传图片</strong>
+            <span id="pairAdviceText">选择裁切区域后，这里会提示建议使用左右还是上下双底色。</span>
+          </div>
+
+          <textarea class="prompt-box hidden-control" id="aiPromptText" readonly placeholder="提示词会在上传图片后自动生成"></textarea>
+        </aside>
+
+      </section>
+    </section>
 
     <template id="assetTemplate">
       <article class="asset-card">
@@ -187,6 +277,104 @@
       </article>
     </template>
 
-    <script src="./app.js"></script>
-  </body>
+<script src="./public-config.js"></script>
+<script src="./app.js?v=20260611-fix2"></script>
+<script>
+(function () {
+  function textOf(node) {
+    return (node && node.textContent || '').replace(/\s+/g, '');
+  }
+
+  function findTabsHost() {
+    var candidates = Array.prototype.slice.call(document.querySelectorAll('body *'));
+    return candidates.find(function (node) {
+      var text = textOf(node);
+      return text.indexOf('图素拆分') !== -1 && text.indexOf('界面抠图') !== -1;
+    });
+  }
+
+  function findContentHost(tabsHost) {
+    var current = tabsHost;
+    while (current && current.parentElement && current.parentElement !== document.body) {
+      current = current.parentElement;
+      if (current.nextElementSibling) return current.parentElement;
+    }
+    return document.body;
+  }
+
+  function setActive(tab) {
+    Array.prototype.slice.call(document.querySelectorAll('[data-local-tab]')).forEach(function (item) {
+      item.classList.toggle('active', item === tab);
+      item.setAttribute('aria-selected', item === tab ? 'true' : 'false');
+    });
+  }
+
+  function mountPsdTab() {
+    if (document.querySelector('[data-local-tab="psd-ui-slicer"]')) return;
+    var tabsHost = findTabsHost();
+    if (!tabsHost) return;
+
+    var sampleTab = Array.prototype.slice.call(tabsHost.querySelectorAll('button, a')).find(function (node) {
+      return textOf(node).indexOf('界面抠图') !== -1;
+    }) || tabsHost.querySelector('button, a');
+
+    var psdTab = sampleTab ? sampleTab.cloneNode(false) : document.createElement('button');
+    psdTab.textContent = 'PSD 控件切图';
+    psdTab.type = 'button';
+    psdTab.href = 'javascript:void(0)';
+    psdTab.dataset.localTab = 'psd-ui-slicer';
+    psdTab.setAttribute('role', 'tab');
+    psdTab.setAttribute('aria-selected', 'false');
+    psdTab.style.marginLeft = '10px';
+    tabsHost.appendChild(psdTab);
+
+    var contentHost = findContentHost(tabsHost);
+    var originalNodes = Array.prototype.slice.call(contentHost.children).filter(function (child) {
+      return child !== tabsHost && child !== tabsHost.parentElement && !child.hasAttribute('data-psd-panel');
+    });
+
+    var panel = document.createElement('section');
+    panel.dataset.psdPanel = 'true';
+    panel.style.display = 'none';
+    panel.style.marginTop = '14px';
+    panel.style.border = '1px solid #1e3a43';
+    panel.style.borderRadius = '8px';
+    panel.style.overflow = 'hidden';
+    panel.style.background = '#071014';
+    panel.style.minHeight = '760px';
+    panel.innerHTML = '<iframe title="PSD 控件切图" src="psd-ui-slicer.html?embedded=1" style="width:100%;height:820px;border:0;display:block;background:#071014"></iframe>';
+    contentHost.appendChild(panel);
+
+    psdTab.addEventListener('click', function (event) {
+      event.preventDefault();
+      setActive(psdTab);
+      originalNodes.forEach(function (node) { node.style.display = 'none'; });
+      panel.style.display = 'block';
+    });
+
+    Array.prototype.slice.call(tabsHost.querySelectorAll('button, a')).forEach(function (tab) {
+      if (tab === psdTab) return;
+      tab.dataset.localTab = tab.dataset.localTab || 'original';
+      tab.addEventListener('click', function () {
+        panel.style.display = 'none';
+        originalNodes.forEach(function (node) { node.style.display = ''; });
+        setActive(tab);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mountPsdTab);
+  } else {
+    mountPsdTab();
+  }
+})();
+</script>
+  <script src="chroma-cleanup-experiment.js?v=20260611-1"></script>
+  <script src="model-switch.js?v=20260612-2"></script>
+  <script src="upload-reset-stable.js?v=20260612-1"></script>
+<script src="zoom-stage-fix.js?v=20260616-stable1"></script>
+  <script src="crop-drag-sync-fix.js?v=20260616-5"></script>
+<script src="chroma-damage-repair.js?v=20260616-1"></script>
+</body>
 </html>

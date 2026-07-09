@@ -1,0 +1,24 @@
+# AI UI 抠图拆分工具
+
+上传 UI 截图，生成透明 PNG。
+
+## 部署说明
+
+- GitHub Pages 只托管前端页面。
+- 登录、注册、积分、AI 抠图扣费和模型调用必须运行在后端服务中。
+- 后端配置放在 `formal-backend/.env.local`，不要提交到 GitHub。
+- 前端连接后端时，修改 `public-config.js`：
+
+```js
+window.AI_UI_CUTOUT_API_BASE_URL = "https://你的后端域名";
+```
+
+本地测试可留空，默认使用当前站点地址。
+
+## 默认积分规则
+
+- Image2：12 分/张
+- Banana Pro：18 分/张
+- Liblib AI：10 分/张
+
+只有 `admin` 是管理员，普通用户注册后默认 0 积分，需要管理员赠送积分后才能使用 AI 抠图。

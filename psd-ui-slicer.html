@@ -1,0 +1,1450 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PSD 游戏 UI 切图助手</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #071014;
+      --panel: #0d1a20;
+      --ink: #e9f2f1;
+      --muted: #9fb3b8;
+      --line: #1e3a43;
+      --accent: #19c6ad;
+      --accent-2: #76dfd1;
+      --ok: #58d391;
+      --warn: #e2ad51;
+      --shadow: 0 12px 30px rgba(0, 0, 0, .18);
+      font-family: "Microsoft YaHei", "PingFang SC", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .topbar {
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(31, 122, 140, .95), rgba(32, 116, 74, .9)),
+        #1f7a8c;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 800;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.25;
+    }
+
+    .sub {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .nav, .tabs {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      background: #0b171c;
+      color: var(--ink);
+      border-radius: 8px;
+      padding: 9px 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 38px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn.active,
+    .btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #03110f;
+      font-weight: 700;
+    }
+
+    .btn.warn {
+      color: var(--accent-2);
+      border-color: rgba(200, 85, 61, .35);
+    }
+
+    .btn:disabled {
+      opacity: .48;
+      cursor: not-allowed;
+    }
+
+    .main {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 310px minmax(0, 1fr) 360px;
+      gap: 16px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .panel-head {
+      border-bottom: 1px solid var(--line);
+      padding: 14px 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.3;
+    }
+
+    .panel-body {
+      padding: 15px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .drop {
+      border: 1px dashed #b8c0cf;
+      background: #fbfcff;
+      border-radius: 8px;
+      padding: 14px;
+      display: grid;
+      gap: 8px;
+      cursor: pointer;
+      min-height: 92px;
+    }
+
+    .drop:hover,
+    .drop.drag {
+      border-color: var(--accent);
+      background: #eef8fa;
+    }
+
+    .drop strong {
+      font-size: 14px;
+    }
+
+    .drop span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 8px;
+      padding: 9px 10px;
+      min-height: 38px;
+    }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .preview {
+      min-height: calc(100vh - 128px);
+      display: grid;
+      grid-template-rows: auto minmax(420px, 1fr) auto;
+    }
+
+    .stage {
+      margin: 15px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        linear-gradient(45deg, #edf0f5 25%, transparent 25%),
+        linear-gradient(-45deg, #edf0f5 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #edf0f5 75%),
+        linear-gradient(-45deg, transparent 75%, #edf0f5 75%);
+      background-size: 22px 22px;
+      background-position: 0 0, 0 11px, 11px -11px, -11px 0;
+      overflow: hidden;
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 430px;
+    }
+
+    .stage img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .empty {
+      width: min(470px, calc(100% - 36px));
+      background: rgba(255, 255, 255, .86);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 22px;
+      text-align: center;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0 15px 15px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 12px;
+      padding: 5px 9px;
+    }
+
+    .chip.good { color: var(--ok); border-color: rgba(32, 116, 74, .35); }
+    .chip.warn { color: var(--warn); border-color: rgba(154, 91, 0, .35); }
+
+    .list {
+      display: grid;
+      gap: 10px;
+      max-height: calc(100vh - 282px);
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .asset {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      background: #fff;
+    }
+
+    .thumb {
+      width: 54px;
+      height: 54px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #f5f7fb;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .thumb img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .asset strong {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .asset small {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .tree {
+      max-height: 240px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px;
+      background: #fbfcff;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .log {
+      border-top: 1px solid var(--line);
+      padding: 12px 15px;
+      color: var(--muted);
+      font-size: 12px;
+      min-height: 42px;
+    }
+
+    .notice {
+      background: #fff8ec;
+      border: 1px solid #f0d6a7;
+      color: #6f4300;
+      border-radius: 8px;
+      padding: 11px 12px;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 1180px) {
+      .main {
+        grid-template-columns: 290px minmax(0, 1fr);
+      }
+
+      .right {
+        grid-column: 1 / -1;
+      }
+
+      .list {
+        max-height: 340px;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .nav {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .main {
+        padding: 12px;
+        grid-template-columns: 1fr;
+      }
+
+      .preview {
+        min-height: auto;
+      }
+
+      .stage {
+        min-height: 330px;
+      }
+
+      .grid2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .embedded .topbar {
+      display: none;
+    }
+
+    .embedded .main {
+      width: 100%;
+      padding: 12px;
+      min-height: 100vh;
+    }
+
+    .embedded .preview {
+      min-height: calc(100vh - 24px);
+    }
+
+    /* Dark surfaces for every interactive/result area. */
+    .drop,
+    .field input,
+    .field select,
+    .tree,
+    .asset,
+    .thumb,
+    .empty,
+    .chip {
+      background: #0a171d !important;
+      color: #e8f3f2 !important;
+      border-color: #294852 !important;
+    }
+
+    .drop:hover,
+    .drop.drag {
+      background: #10262d !important;
+      border-color: #20cbb3 !important;
+    }
+
+    .drop strong,
+    .asset strong,
+    .field label,
+    .panel-title,
+    .tree div {
+      color: #e8f3f2 !important;
+    }
+
+    .drop span,
+    .asset small,
+    .sub,
+    .log {
+      color: #9fb9be !important;
+    }
+
+    .field input::placeholder {
+      color: #739198;
+    }
+
+    .field select option {
+      background: #0a171d;
+      color: #e8f3f2;
+    }
+
+    .notice {
+      background: #211a0d !important;
+      color: #ffd28a !important;
+      border-color: #6d5325 !important;
+    }
+
+    .asset:hover {
+      background: #102229 !important;
+      border-color: #33707b !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark">UI</div>
+        <div>
+          <h1>AI UI 控件切图工具</h1>
+          <p class="sub">上传 PSD 和完成效果图，自动按控件组合切图；文字层默认跳过，留给引擎 Label。</p>
+        </div>
+      </div>
+      <nav class="tabs" aria-label="工具分页">
+        <a class="btn" href="./">图素拆分</a>
+        <a class="btn" href="./">AI 双底色制备</a>
+        <button class="btn active" type="button">PSD 控件切图</button>
+        <button class="btn" id="sampleBtn" type="button">载入示例</button>
+        <button class="btn primary" id="exportBtn" type="button" disabled>导出资源包</button>
+      </nav>
+    </header>
+
+    <main class="main">
+      <section class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title">输入文件</h2>
+        </div>
+        <div class="panel-body stack">
+          <label class="drop" id="psdDrop">
+            <input id="psdInput" type="file" accept=".psd,image/vnd.adobe.photoshop" hidden>
+            <strong>上传 PSD 文件</strong>
+            <span>优先识别图层组和空间重叠控件，不把零散小图层当成最终控件。</span>
+          </label>
+
+          <label class="drop" id="pngDrop">
+            <input id="pngInput" type="file" accept="image/png" hidden>
+            <strong>上传 PNG 效果图</strong>
+            <span>用于预览、控件区域校验和后续 AI 辅助识别。</span>
+          </label>
+
+          <div class="grid2">
+            <div class="field">
+              <label for="engine">目标引擎</label>
+              <select id="engine">
+                <option value="unity">Unity</option>
+                <option value="cocos">Cocos</option>
+                <option value="unreal">Unreal</option>
+                <option value="godot">Godot</option>
+                <option value="generic">通用</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="scale">导出倍率</label>
+              <select id="scale">
+                <option value="1">1x</option>
+                <option value="2">2x</option>
+                <option value="3">3x</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="strategy">切图策略</label>
+            <select id="strategy">
+              <option value="smart">智能组合控件</option>
+              <option value="group">按 PSD 分组导出</option>
+              <option value="manual">手动框选</option>
+            </select>
+          </div>
+
+          <div class="grid2">
+            <div class="field">
+              <label for="padding">透明边距 px</label>
+              <input id="padding" type="number" min="0" max="256" value="4">
+            </div>
+            <div class="field">
+              <label for="pivot">默认锚点</label>
+              <select id="pivot">
+                <option value="0.5,0.5">居中</option>
+                <option value="0,1">左上</option>
+                <option value="0.5,1">上中</option>
+                <option value="0.5,0">下中</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="notice">
+            当前策略会过滤文字层、极小碎层和纯装饰碎片，优先导出按钮、面板、图标、卡牌、进度条等可在游戏引擎复用的控件。
+          </div>
+
+          <div>
+            <h3 class="panel-title">PSD 图层树</h3>
+            <div class="tree" id="layerTree">等待上传 PSD 文件。</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel preview">
+        <div class="panel-head">
+          <h2 class="panel-title">效果图预览</h2>
+          <span class="chip" id="qualityChip">未校验</span>
+        </div>
+        <div class="stage" id="stage">
+          <div class="empty">
+            上传 PNG 效果图后会显示在这里。PSD 自动解析完成后，系统会用它检查切图还原度。
+          </div>
+        </div>
+        <div class="chips" id="statusChips">
+          <span class="chip">PSD：未上传</span>
+          <span class="chip">PNG：未上传</span>
+          <span class="chip">导出：未就绪</span>
+        </div>
+      </section>
+
+      <section class="panel right">
+        <div class="panel-head">
+          <h2 class="panel-title">切图任务</h2>
+          <button class="btn" id="addAssetBtn" type="button">新增任务</button>
+        </div>
+        <div class="panel-body">
+          <div class="list" id="assetList"></div>
+        </div>
+        <div class="log" id="log">准备就绪。</div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    if (new URLSearchParams(location.search).get('embedded') === '1') {
+      document.documentElement.classList.add('embedded');
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/ag-psd/dist/bundle.js"></script>
+  <script>
+    const state = {
+      psdFile: null,
+      pngFile: null,
+      pngUrl: '',
+      assets: [],
+      psd: null
+    };
+
+    const els = {
+      psdInput: document.getElementById('psdInput'),
+      pngInput: document.getElementById('pngInput'),
+      psdDrop: document.getElementById('psdDrop'),
+      pngDrop: document.getElementById('pngDrop'),
+      stage: document.getElementById('stage'),
+      layerTree: document.getElementById('layerTree'),
+      assetList: document.getElementById('assetList'),
+      log: document.getElementById('log'),
+      statusChips: document.getElementById('statusChips'),
+      qualityChip: document.getElementById('qualityChip'),
+      exportBtn: document.getElementById('exportBtn'),
+      addAssetBtn: document.getElementById('addAssetBtn'),
+      sampleBtn: document.getElementById('sampleBtn'),
+      engine: document.getElementById('engine'),
+      scale: document.getElementById('scale'),
+      strategy: document.getElementById('strategy'),
+      padding: document.getElementById('padding'),
+      pivot: document.getElementById('pivot')
+    };
+
+    function formatBytes(bytes) {
+      if (!bytes) return '0 B';
+      const units = ['B', 'KB', 'MB', 'GB'];
+      const idx = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+      return `${(bytes / Math.pow(1024, idx)).toFixed(idx ? 1 : 0)} ${units[idx]}`;
+    }
+
+    function safeName(name) {
+      return (name || 'ui_asset')
+        .replace(/\.[^.]+$/, '')
+        .replace(/[^\w\u4e00-\u9fa5-]+/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_|_$/g, '')
+        .toLowerCase() || 'ui_asset';
+    }
+
+    function log(message) {
+      els.log.textContent = message;
+    }
+
+    function updateStatus() {
+      const ready = Boolean(state.psdFile || state.pngFile || state.assets.length);
+      els.exportBtn.disabled = !ready;
+      els.statusChips.innerHTML = '';
+      const chips = [
+        { text: `PSD：${state.psdFile ? state.psdFile.name : '未上传'}`, cls: state.psdFile ? 'good' : '' },
+        { text: `PNG：${state.pngFile ? state.pngFile.name : '未上传'}`, cls: state.pngFile ? 'good' : '' },
+        { text: `切图任务：${state.assets.length} 个`, cls: state.assets.length ? 'good' : 'warn' }
+      ];
+      chips.forEach(item => {
+        const chip = document.createElement('span');
+        chip.className = `chip ${item.cls}`;
+        chip.textContent = item.text;
+        els.statusChips.appendChild(chip);
+      });
+      els.qualityChip.textContent = state.psdFile && state.pngFile ? '等待解析校验' : '未校验';
+      els.qualityChip.className = `chip ${state.psdFile && state.pngFile ? 'warn' : ''}`;
+    }
+
+    function renderPreview() {
+      els.stage.innerHTML = '';
+      if (!state.pngUrl) {
+        const empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.textContent = '上传 PNG 效果图后会显示在这里。PSD 自动解析完成后，系统会用它检查切图还原度。';
+        els.stage.appendChild(empty);
+        return;
+      }
+      const img = document.createElement('img');
+      img.src = state.pngUrl;
+      img.alt = '效果图预览';
+      els.stage.appendChild(img);
+    }
+
+    function isTextLike(layer) {
+      const name = String(layer.name || '').toLowerCase();
+      return Boolean(layer.text) || /text|txt|label|font|word|文字|文本|标题|等级|战力|属性|解锁|运粮|交战|秒|级/.test(name);
+    }
+
+    function layerBounds(layer) {
+      const left = Number(layer.left || 0);
+      const top = Number(layer.top || 0);
+      const width = Math.max(1, Number(layer.right || 0) - left || (layer.canvas ? layer.canvas.width : 1));
+      const height = Math.max(1, Number(layer.bottom || 0) - top || (layer.canvas ? layer.canvas.height : 1));
+      return { left, top, right: left + width, bottom: top + height, width, height };
+    }
+
+    function isUsefulControlSize(bounds) {
+      const area = bounds.width * bounds.height;
+      if (bounds.width < 28 || bounds.height < 24) return false;
+      if (area < 2400) return false;
+      return true;
+    }
+
+    function collectDrawableLayers(node, out) {
+      (node.children || []).forEach(child => {
+        if (child.hidden || child.visible === false || isTextLike(child)) return;
+        if (child.canvas) out.push(child);
+        if (child.children && child.children.length) collectDrawableLayers(child, out);
+      });
+    }
+
+    function groupBounds(layers) {
+      const boxes = layers.map(layerBounds);
+      const left = Math.min(...boxes.map(box => box.left));
+      const top = Math.min(...boxes.map(box => box.top));
+      const right = Math.max(...boxes.map(box => box.right));
+      const bottom = Math.max(...boxes.map(box => box.bottom));
+      return { left, top, right, bottom, width: right - left, height: bottom - top };
+    }
+
+    function renderGroupCanvas(layers, bounds) {
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.ceil(bounds.width));
+      canvas.height = Math.max(1, Math.ceil(bounds.height));
+      const ctx = canvas.getContext('2d');
+      layers.forEach(layer => {
+        if (!layer.canvas) return;
+        const box = layerBounds(layer);
+        ctx.globalAlpha = typeof layer.opacity === 'number' ? layer.opacity / 255 : 1;
+        ctx.drawImage(layer.canvas, Math.round(box.left - bounds.left), Math.round(box.top - bounds.top));
+      });
+      ctx.globalAlpha = 1;
+      return canvas;
+    }
+
+    function createControlAssetFromGroup(group, drawableLayers) {
+      const bounds = groupBounds(drawableLayers);
+      if (!isUsefulControlSize(bounds)) return null;
+      if (state.psd && bounds.width > state.psd.width * 0.72 && bounds.height > state.psd.height * 0.72) return null;
+      const canvas = renderGroupCanvas(drawableLayers, bounds);
+      return createAsset(safeName(group.name || 'ui_control'), inferType(group.name || ''), bounds.width, bounds.height, canvas.toDataURL('image/png'), {
+        name: group.name || 'ui_control',
+        canvas,
+        children: drawableLayers,
+        left: bounds.left,
+        top: bounds.top,
+        right: bounds.right,
+        bottom: bounds.bottom
+      });
+    }
+
+    function buildSmartAssets(node, assets) {
+      (node.children || []).forEach(child => {
+        if (child.hidden || child.visible === false) return;
+        if (child.children && child.children.length) {
+          const drawable = [];
+          collectDrawableLayers(child, drawable);
+          const groupAsset = drawable.length > 1 ? createControlAssetFromGroup(child, drawable) : null;
+          if (groupAsset) {
+            assets.push(groupAsset);
+          } else {
+            buildSmartAssets(child, assets);
+          }
+          return;
+        }
+        if (!child.canvas || isTextLike(child)) return;
+        const bounds = layerBounds(child);
+        if (!isUsefulControlSize(bounds)) return;
+        assets.push(createAsset(safeName(child.name), inferType(child.name), bounds.width, bounds.height, child.canvas.toDataURL('image/png'), child));
+      });
+    }
+
+    function buildLayerAssets(node, assets) {
+      (node.children || []).forEach(child => {
+        if (child.hidden || child.visible === false || isTextLike(child)) return;
+        if (child.canvas) {
+          const bounds = layerBounds(child);
+          if (isUsefulControlSize(bounds)) {
+            assets.push(createAsset(safeName(child.name), inferType(child.name), bounds.width, bounds.height, child.canvas.toDataURL('image/png'), child));
+          }
+        }
+        if (child.children && child.children.length) buildLayerAssets(child, assets);
+      });
+    }
+
+    function walkPsd(node, depth, rows, assets) {
+      const children = node.children || [];
+      children.forEach((child, index) => {
+        const hidden = child.hidden || child.visible === false;
+        const name = child.name || `layer_${index + 1}`;
+        const hasCanvas = Boolean(child.canvas);
+        const skipped = isTextLike(child) ? ' · 文字跳过' : '';
+        rows.push(`<div style="padding-left:${depth * 14}px">${child.children ? '▸' : '•'} ${name}${hidden ? '（隐藏）' : ''}${hasCanvas ? ' · 图层' : ''}${skipped}</div>`);
+        if (child.children && child.children.length) walkPsd(child, depth + 1, rows, assets);
+      });
+    }
+
+    function inferType(name) {
+      const value = String(name || '').toLowerCase();
+      if (/btn|button|按钮/.test(value)) return 'button';
+      if (/panel|popup|window|bg|面板|弹窗|背景/.test(value)) return 'panel';
+      if (/icon|ico|图标/.test(value)) return 'icon';
+      if (/bar|progress|进度/.test(value)) return 'progress';
+      if (/text|txt|label|文字|标题/.test(value)) return 'text';
+      return 'layer';
+    }
+
+    function renderLayerTree() {
+      if (!state.psdFile) {
+        els.layerTree.textContent = '等待上传 PSD 文件。';
+        return;
+      }
+      if (state.psd) {
+        const rows = [`<div>▾ ${state.psdFile.name} · ${state.psd.width}×${state.psd.height}</div>`];
+        const assets = [];
+        walkPsd(state.psd, 1, rows, assets);
+        if (els.strategy.value === 'layer') {
+          buildLayerAssets(state.psd, assets);
+        } else {
+          buildSmartAssets(state.psd, assets);
+        }
+        els.layerTree.innerHTML = rows.join('');
+        state.assets = assets;
+        renderAssets();
+        return;
+      }
+      const base = safeName(state.psdFile.name);
+      els.layerTree.innerHTML = [
+        `<div>▾ ${base}.psd</div>`,
+        '<div style="padding-left:14px">▸ buttons / 按钮组</div>',
+        '<div style="padding-left:14px">▸ panels / 面板组</div>',
+        '<div style="padding-left:14px">▸ icons / 图标组</div>',
+        '<div style="padding-left:14px">▸ text / 文字层</div>',
+        '<div style="padding-left:14px;color:#9a5b00">PSD 解析库未加载，暂时只能建立占位任务。</div>'
+      ].join('');
+    }
+
+    function createAsset(name, type, width, height, preview, sourceLayer) {
+      return {
+        id: `${Date.now()}_${Math.random().toString(16).slice(2)}`,
+        name,
+        type,
+        width,
+        height,
+        preview: preview || '',
+        sourceLayer: sourceLayer || null,
+        padding: Number(els.padding.value || 0),
+        pivot: els.pivot.value,
+        nineSlice: type === 'panel' || type === 'button'
+      };
+    }
+
+    function seedAssetsFromFiles() {
+      const base = safeName(state.psdFile ? state.psdFile.name : state.pngFile ? state.pngFile.name : 'ui');
+      state.assets = [
+        createAsset(`${base}_panel_main`, 'panel', 640, 420, state.pngUrl),
+        createAsset(`${base}_btn_primary`, 'button', 220, 72, ''),
+        createAsset(`${base}_icon_close`, 'icon', 64, 64, '')
+      ];
+      renderAssets();
+    }
+
+    function renderAssets() {
+      els.assetList.innerHTML = '';
+      if (!state.assets.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.style.width = '100%';
+        empty.textContent = '还没有切图任务。上传文件后会自动生成，也可以手动新增。';
+        els.assetList.appendChild(empty);
+        updateStatus();
+        return;
+      }
+      state.assets.forEach(asset => {
+        const row = document.createElement('div');
+        row.className = 'asset';
+        const thumb = asset.preview
+          ? `<img src="${asset.preview}" alt="">`
+          : asset.type.slice(0, 1).toUpperCase();
+        row.innerHTML = `
+          <div class="thumb">${thumb}</div>
+          <div>
+            <strong title="${asset.name}">${asset.name}</strong>
+            <small>${asset.type} · ${asset.width}×${asset.height}px · padding ${asset.padding}px${asset.nineSlice ? ' · 九宫格候选' : ''}</small>
+          </div>
+        `;
+        els.assetList.appendChild(row);
+      });
+      updateStatus();
+    }
+
+    function readPng(file) {
+      if (state.pngUrl) URL.revokeObjectURL(state.pngUrl);
+      state.pngFile = file;
+      state.pngUrl = URL.createObjectURL(file);
+      renderPreview();
+      if (!state.assets.length) seedAssetsFromFiles();
+      updateStatus();
+      log(`已载入效果图：${file.name}，${formatBytes(file.size)}。`);
+    }
+
+    async function readPsd(file) {
+      state.psdFile = file;
+      state.psd = null;
+      if (window.agPsd && window.agPsd.readPsd) {
+        try {
+          log('正在解析 PSD 图层...');
+          const buffer = await file.arrayBuffer();
+          state.psd = window.agPsd.readPsd(buffer);
+          if (!state.pngUrl && state.psd.canvas) {
+            state.pngUrl = state.psd.canvas.toDataURL('image/png');
+            renderPreview();
+          }
+          log(`已解析 PSD：${file.name}，找到 ${(state.psd.children || []).length} 个顶层图层/组。`);
+        } catch (error) {
+          console.error(error);
+          log(`PSD 解析失败：${error.message || error}。已保留占位切图任务。`);
+        }
+      } else {
+        log('PSD 解析库没有加载成功。请确认浏览器可以访问 CDN，或后续改成本地依赖。');
+      }
+      renderLayerTree();
+      if (!state.assets.length) seedAssetsFromFiles();
+      updateStatus();
+    }
+
+    function bindDrop(drop, input, handler) {
+      drop.addEventListener('dragover', event => {
+        event.preventDefault();
+        drop.classList.add('drag');
+      });
+      drop.addEventListener('dragleave', () => drop.classList.remove('drag'));
+      drop.addEventListener('drop', event => {
+        event.preventDefault();
+        drop.classList.remove('drag');
+        const file = event.dataTransfer.files[0];
+        if (file) handler(file);
+      });
+      input.addEventListener('change', event => {
+        const file = event.target.files[0];
+        if (file) handler(file);
+      });
+    }
+
+    function buildMetadata() {
+      const [pivotX, pivotY] = els.pivot.value.split(',').map(Number);
+      return {
+        version: '0.1.0',
+        mode: 'psd-game-ui-slicer',
+        source: {
+          psd: state.psdFile ? state.psdFile.name : null,
+          previewPng: state.pngFile ? state.pngFile.name : null
+        },
+        export: {
+          engine: els.engine.value,
+          scale: Number(els.scale.value),
+          strategy: els.strategy.value,
+          defaultPadding: Number(els.padding.value || 0),
+          defaultPivot: [pivotX, pivotY]
+        },
+        assets: state.assets.map(asset => ({
+          name: asset.name,
+          type: asset.type,
+          width: asset.width,
+          height: asset.height,
+          padding: [asset.padding, asset.padding, asset.padding, asset.padding],
+          pivot: asset.pivot.split(',').map(Number),
+          nineSlice: asset.nineSlice ? [16, 16, 16, 16] : null,
+          sourceLayers: asset.sourceLayer ? [asset.sourceLayer.name || asset.name] : []
+        }))
+      };
+    }
+
+    function crc32(bytes) {
+      let table = crc32.table;
+      if (!table) {
+        table = crc32.table = new Uint32Array(256);
+        for (let i = 0; i < 256; i++) {
+          let c = i;
+          for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+          table[i] = c >>> 0;
+        }
+      }
+      let crc = -1;
+      for (let i = 0; i < bytes.length; i++) crc = (crc >>> 8) ^ table[(crc ^ bytes[i]) & 0xff];
+      return (crc ^ -1) >>> 0;
+    }
+
+    function encodeText(text) {
+      return new TextEncoder().encode(text);
+    }
+
+    function uint16(value) {
+      return [value & 0xff, (value >>> 8) & 0xff];
+    }
+
+    function uint32(value) {
+      return [value & 0xff, (value >>> 8) & 0xff, (value >>> 16) & 0xff, (value >>> 24) & 0xff];
+    }
+
+    function makeZip(files) {
+      const localParts = [];
+      const centralParts = [];
+      let offset = 0;
+      files.forEach(file => {
+        const name = encodeText(file.name);
+        const data = file.data instanceof Uint8Array ? file.data : encodeText(file.data);
+        const crc = crc32(data);
+        const local = new Uint8Array([
+          ...uint32(0x04034b50), ...uint16(20), ...uint16(0), ...uint16(0), ...uint16(0), ...uint16(0),
+          ...uint32(crc), ...uint32(data.length), ...uint32(data.length), ...uint16(name.length), ...uint16(0)
+        ]);
+        localParts.push(local, name, data);
+        const central = new Uint8Array([
+          ...uint32(0x02014b50), ...uint16(20), ...uint16(20), ...uint16(0), ...uint16(0), ...uint16(0), ...uint16(0),
+          ...uint32(crc), ...uint32(data.length), ...uint32(data.length), ...uint16(name.length), ...uint16(0), ...uint16(0),
+          ...uint16(0), ...uint16(0), ...uint32(0), ...uint32(offset)
+        ]);
+        centralParts.push(central, name);
+        offset += local.length + name.length + data.length;
+      });
+      const centralSize = centralParts.reduce((sum, part) => sum + part.length, 0);
+      const end = new Uint8Array([
+        ...uint32(0x06054b50), ...uint16(0), ...uint16(0), ...uint16(files.length), ...uint16(files.length),
+        ...uint32(centralSize), ...uint32(offset), ...uint16(0)
+      ]);
+      return new Blob([...localParts, ...centralParts, end], { type: 'application/zip' });
+    }
+
+    function canvasToPngBytes(canvas) {
+      return new Promise(resolve => {
+        canvas.toBlob(async blob => {
+          if (blob) {
+            resolve(new Uint8Array(await blob.arrayBuffer()));
+            return;
+          }
+          const dataUrl = canvas.toDataURL('image/png');
+          const base64 = dataUrl.split(',')[1] || '';
+          const binary = atob(base64);
+          const bytes = new Uint8Array(binary.length);
+          for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+          resolve(bytes);
+        }, 'image/png');
+      });
+    }
+
+    async function downloadPackage() {
+      els.exportBtn.disabled = true;
+      log('正在打包资源，请稍等...');
+      try {
+        const metadata = buildMetadata();
+        const files = [
+          { name: 'metadata.json', data: JSON.stringify(metadata, null, 2) },
+          { name: 'report.txt', data: 'PSD 游戏 UI 切图助手导出报告\\n当前版本按控件组优先导出 PNG，文字层默认跳过；复杂图层效果以浏览器解析结果为准。\\n' }
+        ];
+        for (const asset of state.assets) {
+          if (asset.sourceLayer && asset.sourceLayer.canvas) {
+            files.push({
+              name: `assets/${asset.type}/${asset.name}.png`,
+              data: await canvasToPngBytes(asset.sourceLayer.canvas)
+            });
+          }
+        }
+        const blob = makeZip(files);
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'game-ui-slices.zip';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1200);
+        log(`已导出资源包：${files.length} 个文件。`);
+      } catch (error) {
+        console.error(error);
+        log(`导出失败：${error.message || error}`);
+      } finally {
+        els.exportBtn.disabled = false;
+      }
+    }
+
+    bindDrop(els.psdDrop, els.psdInput, readPsd);
+    bindDrop(els.pngDrop, els.pngInput, readPng);
+
+    els.addAssetBtn.addEventListener('click', () => {
+      state.assets.push(createAsset(`ui_asset_${state.assets.length + 1}`, 'manual', 128, 128, ''));
+      renderAssets();
+      log('已新增一个手动切图任务。');
+    });
+
+    els.sampleBtn.addEventListener('click', () => {
+      state.assets = [
+        createAsset('panel_shop_main', 'panel', 720, 520, ''),
+        createAsset('btn_buy_normal', 'button', 236, 78, ''),
+        createAsset('btn_buy_pressed', 'button', 236, 78, ''),
+        createAsset('icon_coin', 'icon', 72, 72, ''),
+        createAsset('bar_energy_fill', 'progress', 312, 28, '')
+      ];
+      renderAssets();
+      log('已载入示例切图任务。');
+    });
+
+    els.exportBtn.addEventListener('click', downloadPackage);
+    ['engine', 'scale', 'strategy', 'padding', 'pivot'].forEach(id => {
+      els[id].addEventListener('change', () => {
+        if (id === 'strategy' && state.psd) {
+          renderLayerTree();
+          log(`已切换切图策略：${els.strategy.options[els.strategy.selectedIndex].text}。`);
+          return;
+        }
+        state.assets = state.assets.map(asset => ({
+          ...asset,
+          padding: Number(els.padding.value || 0),
+          pivot: els.pivot.value
+        }));
+        renderAssets();
+      });
+    });
+
+    renderAssets();
+    updateStatus();
+  </script>
+  <script>
+    // Smart control analyzer: PSD layers are evidence, not export units.
+    function isTextLikeV2(layer) {
+      const name = String(layer && layer.name || '').toLowerCase();
+      return Boolean(layer && (layer.text || layer.textData)) ||
+        /text|txt|label|font|word|number|文字|文本|标题|名称|名字|等级|战力|属性|解锁|运粮|交战|倒计时|人数|秒|级/.test(name);
+    }
+
+    function controlTypeV2(name) {
+      const value = String(name || '').toLowerCase();
+      if (/btn|button|按钮|确认|取消|购买|领取|关闭|返回/.test(value)) return 'button';
+      if (/tab|页签|标签/.test(value)) return 'tab';
+      if (/card|item|cell|卡牌|列表项/.test(value)) return 'item';
+      if (/panel|popup|window|面板|弹窗/.test(value)) return 'panel';
+      if (/icon|ico|图标/.test(value)) return 'icon';
+      if (/bar|progress|进度/.test(value)) return 'progress';
+      return 'control';
+    }
+
+    function semanticNameV2(name) {
+      return /btn|button|tab|panel|popup|window|icon|item|cell|card|bar|progress|按钮|页签|标签|面板|弹窗|图标|列表项|卡牌|进度|关闭|返回|确认|取消|领取|购买/i.test(String(name || ''));
+    }
+
+    function boxV2(layer) {
+      const left = Number(layer.left || 0);
+      const top = Number(layer.top || 0);
+      const width = Math.max(1, Number(layer.right || 0) - left || (layer.canvas ? layer.canvas.width : 1));
+      const height = Math.max(1, Number(layer.bottom || 0) - top || (layer.canvas ? layer.canvas.height : 1));
+      return { left, top, right: left + width, bottom: top + height, width, height };
+    }
+
+    function unionBoxV2(layers) {
+      const boxes = layers.map(boxV2);
+      const left = Math.min(...boxes.map(box => box.left));
+      const top = Math.min(...boxes.map(box => box.top));
+      const right = Math.max(...boxes.map(box => box.right));
+      const bottom = Math.max(...boxes.map(box => box.bottom));
+      return { left, top, right, bottom, width: right - left, height: bottom - top };
+    }
+
+    function intersectionV2(a, b) {
+      return Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) *
+        Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+    }
+
+    function overlapV2(a, b) {
+      return intersectionV2(a, b) / Math.max(1, Math.min(a.width * a.height, b.width * b.height));
+    }
+
+    function iouV2(a, b) {
+      const intersection = intersectionV2(a, b);
+      return intersection / Math.max(1, a.width * a.height + b.width * b.height - intersection);
+    }
+
+    function wholeScreenV2(bounds) {
+      return Boolean(state.psd) && bounds.width >= state.psd.width * .68 && bounds.height >= state.psd.height * .68;
+    }
+
+    function usefulSizeV2(bounds) {
+      return bounds.width >= 28 && bounds.height >= 24 && bounds.width * bounds.height >= 2400 && !wholeScreenV2(bounds);
+    }
+
+    function structuralLayerV2(layer) {
+      if (!state.psd) return false;
+      const bounds = boxV2(layer);
+      const ratio = bounds.width * bounds.height / Math.max(1, state.psd.width * state.psd.height);
+      return ratio > .32 || wholeScreenV2(bounds);
+    }
+
+    function collectDrawableV2(node, out) {
+      (node.children || []).forEach(child => {
+        if (child.hidden || child.visible === false || isTextLikeV2(child)) return;
+        if (child.canvas) out.push(child);
+        if (child.children && child.children.length) collectDrawableV2(child, out);
+      });
+    }
+
+    function cohesiveV2(layers) {
+      const usable = layers.filter(layer => !structuralLayerV2(layer));
+      if (usable.length < 2) return false;
+      return usable.every((layer, index) => usable.some((other, otherIndex) =>
+        index !== otherIndex && overlapV2(boxV2(layer), boxV2(other)) >= .16
+      ));
+    }
+
+    function renderControlV2(layers, bounds) {
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.ceil(bounds.width));
+      canvas.height = Math.max(1, Math.ceil(bounds.height));
+      const context = canvas.getContext('2d');
+      layers.slice().reverse().forEach(layer => {
+        if (!layer.canvas || isTextLikeV2(layer)) return;
+        const boundsForLayer = boxV2(layer);
+        context.globalAlpha = typeof layer.opacity === 'number' ? layer.opacity / 255 : 1;
+        context.drawImage(layer.canvas, Math.round(boundsForLayer.left - bounds.left), Math.round(boundsForLayer.top - bounds.top));
+      });
+      context.globalAlpha = 1;
+      return canvas;
+    }
+
+    function candidateFromGroupV2(group, layers, depth) {
+      if (layers.length < 2) return null;
+      const bounds = unionBoxV2(layers);
+      if (!usefulSizeV2(bounds)) return null;
+      if (!semanticNameV2(group.name) && !cohesiveV2(layers)) return null;
+      const canvas = renderControlV2(layers, bounds);
+      const type = controlTypeV2(group.name);
+      const fallbackName = `${type}_${Math.round(bounds.left)}_${Math.round(bounds.top)}`;
+      const source = {
+        name: group.name || fallbackName,
+        canvas,
+        children: layers,
+        left: bounds.left,
+        top: bounds.top,
+        right: bounds.right,
+        bottom: bounds.bottom
+      };
+      return {
+        bounds,
+        depth,
+        semantic: semanticNameV2(group.name),
+        asset: createAsset(safeName(semanticNameV2(group.name) ? group.name : fallbackName), type, bounds.width, bounds.height, canvas.toDataURL('image/png'), source)
+      };
+    }
+
+    function collectGroupsV2(node, candidates, depth) {
+      (node.children || []).forEach(child => {
+        if (child.hidden || child.visible === false || !child.children || !child.children.length) return;
+        collectGroupsV2(child, candidates, depth + 1);
+        const layers = [];
+        collectDrawableV2(child, layers);
+        const candidate = candidateFromGroupV2(child, layers, depth);
+        if (candidate) candidates.push(candidate);
+      });
+    }
+
+    function flattenV2(node, layers) {
+      (node.children || []).forEach(child => {
+        if (child.hidden || child.visible === false || isTextLikeV2(child)) return;
+        if (child.canvas && !structuralLayerV2(child) && usefulSizeV2(boxV2(child))) layers.push(child);
+        if (child.children && child.children.length) flattenV2(child, layers);
+      });
+    }
+
+    function looseClustersV2(layers) {
+      const clusters = [];
+      layers.forEach(layer => {
+        const bounds = boxV2(layer);
+        const target = clusters.find(cluster => overlapV2(cluster.bounds, bounds) >= .28);
+        if (!target) {
+          clusters.push({ layers: [layer], bounds });
+          return;
+        }
+        target.layers.push(layer);
+        target.bounds = unionBoxV2(target.layers);
+      });
+      return clusters;
+    }
+
+    function buildSmartAssets(node, assets) {
+      const candidates = [];
+      collectGroupsV2(node, candidates, 0);
+
+      const loose = [];
+      flattenV2(node, loose);
+      looseClustersV2(loose).forEach((cluster, index) => {
+        if (cluster.layers.length < 2 || !cohesiveV2(cluster.layers)) return;
+        const candidate = candidateFromGroupV2({ name: `control_${index + 1}` }, cluster.layers, 0);
+        if (candidate) candidates.push(candidate);
+      });
+
+      candidates
+        .sort((a, b) => Number(b.semantic) - Number(a.semantic) || b.depth - a.depth || (a.bounds.width * a.bounds.height) - (b.bounds.width * b.bounds.height))
+        .filter((candidate, index, list) => !list.slice(0, index).some(kept => iouV2(candidate.bounds, kept.bounds) > .72))
+        .forEach(candidate => assets.push(candidate.asset));
+
+      log(`已按 UI 控件标准分析：识别 ${assets.length} 个控件；文字、整页背景和零散碎层已跳过。`);
+    }
+  </script>
+  <script>
+    // V3: UI controls are primarily inferred from compact PSD groups. Elements
+    // inside a control may be adjacent rather than overlapping (cards, tabs,
+    // skill slots), so overlap is no longer a hard requirement.
+    function visibleChildrenV3(node) {
+      return (node.children || []).filter(child => !child.hidden && child.visible !== false);
+    }
+
+    function drawableLayersV3(node, output) {
+      visibleChildrenV3(node).forEach(child => {
+        if (isTextLikeV2(child)) return;
+        if (child.canvas) output.push(child);
+        if (child.children && child.children.length) drawableLayersV3(child, output);
+      });
+    }
+
+    function validControlBoundsV3(bounds) {
+      if (!state.psd) return usefulSizeV2(bounds);
+      const screenArea = state.psd.width * state.psd.height;
+      const areaRatio = bounds.width * bounds.height / Math.max(1, screenArea);
+      if (bounds.width < 32 || bounds.height < 28 || bounds.width * bounds.height < 1800) return false;
+      if (bounds.width > state.psd.width * .78 && bounds.height > state.psd.height * .55) return false;
+      if (areaRatio > .34) return false;
+      return true;
+    }
+
+    function groupCandidateV3(group, depth) {
+      const layers = [];
+      drawableLayersV3(group, layers);
+      if (!layers.length) return null;
+      const bounds = unionBoxV2(layers);
+      if (!validControlBoundsV3(bounds)) return null;
+
+      const directVisuals = visibleChildrenV3(group).filter(child => child.canvas && !isTextLikeV2(child)).length;
+      const directGroups = visibleChildrenV3(group).filter(child => child.children && child.children.length).length;
+      const named = semanticNameV2(group.name);
+      const leafLike = directVisuals > 0 || directGroups === 0;
+      if (!named && !leafLike && layers.length < 2) return null;
+
+      const canvas = renderControlV2(layers, bounds);
+      const type = controlTypeV2(group.name);
+      const generic = /^(group|layer|组|图层|copy|副本|拷贝)[-_\s]*\d*$/i.test(String(group.name || '').trim());
+      const name = named || !generic
+        ? safeName(group.name)
+        : `${type}_${Math.round(bounds.left)}_${Math.round(bounds.top)}`;
+      const source = {
+        name: group.name || name,
+        canvas,
+        children: layers,
+        left: bounds.left,
+        top: bounds.top,
+        right: bounds.right,
+        bottom: bounds.bottom
+      };
+      return {
+        asset: createAsset(name, type, bounds.width, bounds.height, canvas.toDataURL('image/png'), source),
+        bounds,
+        depth,
+        named,
+        directVisuals,
+        layerCount: layers.length
+      };
+    }
+
+    function collectCandidatesV3(node, output, depth) {
+      visibleChildrenV3(node).forEach(child => {
+        if (!child.children || !child.children.length) return;
+        collectCandidatesV3(child, output, depth + 1);
+        const candidate = groupCandidateV3(child, depth);
+        if (candidate) output.push(candidate);
+      });
+    }
+
+    function containsV3(outer, inner, margin) {
+      const pad = margin || 4;
+      return outer.left <= inner.left + pad && outer.top <= inner.top + pad &&
+        outer.right >= inner.right - pad && outer.bottom >= inner.bottom - pad;
+    }
+
+    function nearSameBoundsV3(a, b) {
+      return iouV2(a, b) > .82 ||
+        (Math.abs(a.left - b.left) < 5 && Math.abs(a.top - b.top) < 5 &&
+          Math.abs(a.right - b.right) < 5 && Math.abs(a.bottom - b.bottom) < 5);
+    }
+
+    function keepUsefulHierarchyV3(candidates) {
+      const exactDeduped = candidates
+        .sort((a, b) => b.depth - a.depth || Number(b.named) - Number(a.named) || b.layerCount - a.layerCount)
+        .filter((candidate, index, list) => !list.slice(0, index).some(kept => nearSameBoundsV3(candidate.bounds, kept.bounds)));
+
+      return exactDeduped.filter(candidate => {
+        const descendants = exactDeduped.filter(other => other !== candidate && other.depth > candidate.depth && containsV3(candidate.bounds, other.bounds, 2));
+        if (!descendants.length) return true;
+        if (candidate.named) return true;
+        const coveredArea = descendants.reduce((sum, item) => sum + item.bounds.width * item.bounds.height, 0);
+        const ownArea = candidate.bounds.width * candidate.bounds.height;
+        return coveredArea < ownArea * .72;
+      });
+    }
+
+    function isolatedSemanticLayersV3(node, output) {
+      visibleChildrenV3(node).forEach(child => {
+        if (isTextLikeV2(child)) return;
+        if (child.children && child.children.length) {
+          isolatedSemanticLayersV3(child, output);
+          return;
+        }
+        if (!child.canvas || !semanticNameV2(child.name)) return;
+        const bounds = boxV2(child);
+        if (!validControlBoundsV3(bounds)) return;
+        const type = controlTypeV2(child.name);
+        output.push({
+          asset: createAsset(safeName(child.name), type, bounds.width, bounds.height, child.canvas.toDataURL('image/png'), child),
+          bounds,
+          depth: 999,
+          named: true,
+          directVisuals: 1,
+          layerCount: 1
+        });
+      });
+    }
+
+    function buildSmartAssets(node, assets) {
+      const candidates = [];
+      collectCandidatesV3(node, candidates, 0);
+      isolatedSemanticLayersV3(node, candidates);
+
+      keepUsefulHierarchyV3(candidates)
+        .sort((a, b) => a.bounds.top - b.bounds.top || a.bounds.left - b.bounds.left)
+        .forEach(candidate => assets.push(candidate.asset));
+
+      log(`已按 UI 控件分组识别 ${assets.length} 个资源；每个资源合成所属装饰层并排除文字层。`);
+    }
+  </script>
+</body>
+</html>

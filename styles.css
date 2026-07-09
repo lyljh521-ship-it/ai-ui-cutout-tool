@@ -28,6 +28,32 @@ body {
   background: #070d11;
 }
 
+.page-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 14px 18px 0;
+}
+
+.tab-button {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  background: var(--surface);
+  font-weight: 800;
+}
+
+.tab-button.is-active {
+  color: #06211c;
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+
+.is-hidden {
+  display: none !important;
+}
+
 button,
 input {
   font: inherit;
@@ -50,6 +76,135 @@ button:disabled {
   min-height: 100vh;
   padding: 18px;
   align-items: start;
+}
+
+.prepare-page {
+  min-height: calc(100vh - 54px);
+  padding: 18px;
+}
+
+.prepare-header,
+.prepare-controls,
+.crop-stage {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.prepare-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  margin-bottom: 18px;
+}
+
+.prepare-header p {
+  margin-top: 8px;
+  color: var(--muted);
+}
+
+.prepare-actions {
+  display: flex;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.prepare-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 18px;
+  align-items: start;
+}
+
+.prepare-controls {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+.prep-upload.full {
+  min-height: 92px;
+}
+
+.crop-upload-box {
+  grid-column: 1 / -1;
+  min-height: 120px;
+}
+
+.crop-upload-box.has-image {
+  min-height: min(70vh, 680px);
+  border-style: solid;
+  cursor: grab;
+}
+
+.crop-upload-box.has-image input {
+  pointer-events: none;
+}
+
+.crop-upload-box.has-image:active {
+  cursor: grabbing;
+}
+
+.crop-upload-box canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 14px;
+  background: #081217;
+}
+
+.crop-upload-box.has-image span {
+  display: none;
+}
+
+.remove-upload {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  color: #fff;
+  background: #d73333;
+  font-size: 20px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.remove-upload[hidden] {
+  display: none;
+}
+
+.prompt-box {
+  width: 100%;
+  min-height: 260px;
+  resize: vertical;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: #0b1519;
+  line-height: 1.55;
+  grid-column: 2;
+  grid-row: 2 / span 3;
+}
+
+#cropCanvas {
+  cursor: grab;
+}
+
+#cropCanvas.is-dragging {
+  cursor: grabbing;
 }
 
 .workspace,
@@ -185,6 +340,19 @@ h1 {
 .drop-copy span {
   color: var(--muted);
   font-size: 14px;
+}
+
+.compact-drop-copy span {
+  display: none;
+}
+
+#aiGeneratedDualBgPanel {
+  display: none !important;
+}
+
+#aiPromptPresetBar,
+.ai-prompt-preset-wrap {
+  display: none !important;
 }
 
 .stage-wrap {
@@ -604,10 +772,100 @@ input[type="range"] {
   font-weight: 800;
 }
 
+.access-box .secondary-access-button {
+  color: var(--accent-strong);
+  background: #17332f;
+}
+
 .access-error {
   min-height: 18px;
   color: #ffb3a8;
   font-size: 13px;
+}
+
+.account-bar,
+.admin-credit-panel {
+  margin: 14px 18px 0;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.account-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.account-summary,
+.account-actions,
+.admin-credit-head,
+.admin-user-form,
+.admin-user-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.account-summary span {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.account-summary b {
+  color: var(--accent-strong);
+}
+
+.account-actions button,
+.admin-credit-head button,
+.admin-user-form button {
+  min-height: 36px;
+  border-radius: 8px;
+  padding: 0 12px;
+  color: #06211c;
+  background: var(--accent-strong);
+  font-weight: 800;
+}
+
+.admin-credit-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-credit-head {
+  justify-content: space-between;
+}
+
+.admin-user-form {
+  align-items: stretch;
+}
+
+.admin-user-form input,
+.admin-user-form select {
+  min-height: 40px;
+  min-width: 160px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: #0b1519;
+}
+
+.admin-user-list {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-user-row {
+  justify-content: space-between;
+  padding: 9px 10px;
+  border: 1px solid rgba(126, 239, 220, 0.18);
+  border-radius: 8px;
+  background: rgba(126, 239, 220, 0.06);
 }
 
 .hidden-control {
@@ -678,6 +936,19 @@ input[type="color"],
     grid-template-columns: 1fr;
   }
 
+  .prepare-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .prepare-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .prompt-box {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
   .asset-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -685,4 +956,782 @@ input[type="color"],
   #mainCanvas {
     max-height: 42vh;
   }
+}
+.ai-generated-preview-panel {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid rgba(126, 240, 220, 0.24);
+  border-radius: 8px;
+  background: rgba(8, 26, 30, 0.92);
+}
+
+.ai-generated-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.ai-generated-preview-head h3 {
+  margin: 0 0 6px;
+  color: #dffdf8;
+  font-size: 18px;
+}
+
+.ai-generated-preview-head p {
+  margin: 0;
+  color: rgba(222, 247, 244, 0.68);
+  font-size: 14px;
+}
+
+.ai-generated-preview-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ai-generated-preview-actions button {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 16px;
+  color: #042a27;
+  background: #76f0dc;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ai-generated-preview-actions button:first-child {
+  background: rgba(118, 240, 220, 0.14);
+  color: #8cf7e6;
+  border: 1px solid rgba(118, 240, 220, 0.24);
+}
+
+.ai-alignment-status {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(118, 240, 220, 0.2);
+  border-radius: 8px;
+  color: #bffdf3;
+  background: rgba(118, 240, 220, 0.08);
+  font-size: 13px;
+}
+
+.ai-generated-preview-canvas {
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background:
+    linear-gradient(45deg, rgba(255,255,255,.08) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255,255,255,.08) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255,255,255,.08) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255,255,255,.08) 75%);
+  background-color: #0b171a;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  background-size: 16px 16px;
+}
+
+.ai-generated-preview-canvas img {
+  display: block;
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+}
+
+.floating-ai-preview {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1000;
+  width: min(360px, calc(100vw - 36px));
+  border: 1px solid rgba(126, 240, 220, 0.34);
+  border-radius: 8px;
+  background: rgba(4, 18, 22, 0.96);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.floating-ai-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  color: #dffdf8;
+  border-bottom: 1px solid rgba(126, 240, 220, 0.16);
+}
+
+.floating-ai-preview-head button {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 86, 86, 0.9);
+  color: #fff;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.floating-ai-preview img {
+  display: block;
+  width: 100%;
+  max-height: 280px;
+  object-fit: contain;
+  background:
+    linear-gradient(45deg, rgba(255,255,255,.08) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255,255,255,.08) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255,255,255,.08) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255,255,255,.08) 75%);
+  background-color: #0b171a;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  background-size: 16px 16px;
+}
+
+.floating-ai-preview-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 10px;
+}
+
+.floating-ai-preview-actions button {
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 10px;
+  color: #042a27;
+  background: #76f0dc;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 720px) {
+  .ai-generated-preview-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .ai-generated-preview-actions button {
+    flex: 1;
+  }
+}
+.ai-generated-preview-panel {
+  margin: 18px 14px;
+  padding: 18px;
+  border: 1px solid rgba(126, 239, 220, 0.22);
+  border-radius: 8px;
+  background: rgba(8, 26, 30, 0.92);
+  color: #dffcf7;
+}
+
+.ai-generated-preview-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.ai-generated-preview-head h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  color: #ffffff;
+}
+
+.ai-generated-preview-head p {
+  margin: 0;
+  color: rgba(223, 252, 247, 0.72);
+  line-height: 1.55;
+}
+
+.ai-generated-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.ai-generated-preview-empty {
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(126, 239, 220, 0.25);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+  color: rgba(223, 252, 247, 0.58);
+  font-weight: 700;
+}
+
+#aiGeneratedDualBgPreview {
+  display: none;
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border: 1px solid rgba(126, 239, 220, 0.18);
+  border-radius: 8px;
+  background:
+    linear-gradient(45deg, rgba(255,255,255,.06) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255,255,255,.06) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255,255,255,.06) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255,255,255,.06) 75%);
+  background-size: 22px 22px;
+  background-position: 0 0, 0 11px, 11px -11px, -11px 0;
+}
+
+.ai-alignment-status {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(21, 183, 161, 0.1);
+  color: #84f5e5;
+  font-size: 13px;
+}
+
+@media (max-width: 760px) {
+  .ai-generated-preview-head {
+    display: block;
+  }
+
+  .ai-generated-preview-actions {
+    justify-content: flex-start;
+    margin-top: 12px;
+  }
+}
+
+.crop-zoom-control {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) minmax(220px, 1fr) auto;
+  align-items: center;
+  gap: 10px 14px;
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px solid rgba(126, 239, 220, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.ai-prompt-preset-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0 0 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-sizing: border-box;
+}
+
+.ai-prompt-preset-wrap select,
+.crop-zoom-control input[type="range"] {
+  width: 100%;
+}
+
+.ai-prompt-preset-wrap select {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  height: 40px;
+  box-sizing: border-box;
+}
+
+.ai-prompt-preset-wrap p {
+  margin: 0;
+  color: rgba(223, 252, 247, 0.62);
+  font-size: 13px;
+}
+
+.crop-zoom-control label,
+.ai-prompt-preset-wrap label {
+  color: #dffcf7;
+  font-weight: 700;
+}
+
+.crop-zoom-control strong {
+  color: #79efdd;
+}
+
+#aiGeneratedDualBgPanel {
+  width: auto;
+  min-height: 0;
+  margin-top: 16px;
+}
+
+@media (max-width: 760px) {
+  .crop-zoom-control {
+    grid-template-columns: 1fr;
+  }
+}
+/* The model shown here is the exact model id confirmed by the local backend. */
+.actual-model-status {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid #285d59;
+  border-radius: 6px;
+  color: #9eece2;
+  background: #0c2424;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.actual-model-status[data-state="running"] {
+  border-color: #3dc6b4;
+  color: #d8fffa;
+}
+
+.actual-model-status[data-state="done"] {
+  border-color: #4ccf82;
+  color: #bfffd8;
+  background: #0d2a20;
+}
+[data-zoom-workspace="1"] {
+  position: relative !important;
+  overflow: hidden !important;
+  contain: none !important;
+  clip-path: none !important;
+}
+
+/* The large upload workspace is the only viewport boundary. The scaled image
+   must not be clipped by its original fitted-image wrapper. */
+[data-zoom-workspace="1"] * {
+  contain: none !important;
+  clip: auto !important;
+  clip-path: none !important;
+}
+
+[data-zoom-workspace="1"] > *:not(button),
+[data-zoom-workspace="1"] > *:not(button) * {
+  overflow: visible !important;
+}
+
+[data-zoom-workspace="1"] .crop-image-zoom-layer,
+[data-zoom-workspace="1"] [data-crop-zoom-layer],
+[data-zoom-workspace="1"] .crop-zoom-overlay {
+  overflow: visible !important;
+  max-width: none !important;
+  max-height: none !important;
+}
+
+[data-zoom-workspace="1"] .crop-image-zoom-layer img,
+[data-zoom-workspace="1"] [data-crop-zoom-layer] img,
+[data-zoom-workspace="1"] .crop-zoom-overlay img {
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: fill !important;
+}
+
+[data-zoom-unclip="1"] {
+  overflow: visible !important;
+  contain: none !important;
+  clip: auto !important;
+  clip-path: none !important;
+  mask: none !important;
+}
+
+[data-zoom-unclip="1"] img,
+[data-zoom-unclip="1"] canvas {
+  max-width: none !important;
+  max-height: none !important;
+}
+.full-workspace-image-canvas {
+  display: none !important;
+}
+
+[data-full-zoom-workspace="1"] > *:not(.full-workspace-image-canvas) {
+  position: revert;
+  z-index: auto;
+}
+
+[data-full-zoom-workspace="1"] .crop-selection,
+[data-full-zoom-workspace="1"] [data-crop-selection],
+[data-full-zoom-workspace="1"] .selection-box {
+  visibility: visible !important;
+  pointer-events: auto !important;
+  z-index: 10 !important;
+}
+
+/* Restore the native cropper. Zoomed image content may overflow its fitted
+   image wrapper, while the large upload stage remains the visible boundary. */
+.crop-image-zoom-layer,
+[data-crop-zoom-layer],
+.crop-zoom-overlay {
+  overflow: visible !important;
+  contain: none !important;
+  clip: auto !important;
+  clip-path: none !important;
+}
+
+.crop-image-zoom-layer img,
+[data-crop-zoom-layer] img,
+.crop-zoom-overlay img,
+.crop-image-zoom-layer canvas,
+[data-crop-zoom-layer] canvas,
+.crop-zoom-overlay canvas {
+  max-width: none !important;
+  max-height: none !important;
+}
+.zoom-workspace-boundary {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate;
+}
+
+.workspace-zoom-stage {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate;
+}
+
+.workspace-expanded-image {
+  position: absolute !important;
+  display: block !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  z-index: 2 !important;
+}
+
+.workspace-crop-control {
+  visibility: visible !important;
+  pointer-events: auto !important;
+  z-index: 60 !important;
+}
+
+.workspace-native-image-hidden {
+  opacity: 0 !important;
+}
+
+.workspace-zoom-stage button {
+  z-index: 100 !important;
+}
+
+.zoom-workspace-boundary .zoom-overflow-unlocked {
+  overflow: visible !important;
+  clip: auto !important;
+  clip-path: none !important;
+  contain: none !important;
+}
+.crop-drag-sync-target {
+  cursor: move !important;
+  touch-action: none !important;
+  will-change: left, top, transform;
+  z-index: 50 !important;
+  box-sizing: border-box !important;
+  border: 1px solid rgba(255, 255, 255, 0.86) !important;
+  outline: 1px solid rgba(255, 255, 255, 0.42) !important;
+  outline-offset: -1px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.26) !important;
+}
+
+.crop-drag-sync-active,
+.crop-drag-sync-active * {
+  user-select: none !important;
+  cursor: grabbing !important;
+}
+/* AI dual-background preparation page layout guard.
+   Keeps prompt controls and upload/crop panels from overflowing into each other. */
+.tab-panel[data-tab="ai-prep"],
+.tab-panel.ai-prep,
+#aiPrepPanel,
+#aiPrepTab,
+#aiPrep,
+.ai-prep-page,
+.dual-prep-page {
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.tab-panel[data-tab="ai-prep"] *,
+.tab-panel.ai-prep *,
+#aiPrepPanel *,
+#aiPrepTab *,
+#aiPrep *,
+.ai-prep-page *,
+.dual-prep-page * {
+  box-sizing: border-box;
+}
+
+.tab-panel[data-tab="ai-prep"] select,
+.tab-panel[data-tab="ai-prep"] textarea,
+.tab-panel[data-tab="ai-prep"] input,
+.tab-panel.ai-prep select,
+.tab-panel.ai-prep textarea,
+.tab-panel.ai-prep input,
+#aiPrepPanel select,
+#aiPrepPanel textarea,
+#aiPrepPanel input,
+#aiPrepTab select,
+#aiPrepTab textarea,
+#aiPrepTab input,
+#aiPrep select,
+#aiPrep textarea,
+#aiPrep input,
+.ai-prep-page select,
+.ai-prep-page textarea,
+.ai-prep-page input,
+.dual-prep-page select,
+.dual-prep-page textarea,
+.dual-prep-page input {
+  max-width: 100%;
+}
+
+.prompt-panel,
+.prompt-card,
+.prompt-settings,
+.prompt-editor,
+.prompt-preset-card,
+.ai-prompt-panel,
+.ai-prompt-card,
+.ai-prompt-settings,
+.ai-prompt-editor {
+  position: static !important;
+  display: grid !important;
+  grid-template-columns: minmax(180px, 360px) minmax(0, 1fr);
+  gap: 12px 16px;
+  align-items: start;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  padding: 16px;
+  border: 1px solid rgba(122, 244, 225, 0.18);
+  border-radius: 8px;
+  background: rgba(9, 28, 31, 0.88);
+}
+
+.prompt-panel label,
+.prompt-card label,
+.prompt-settings label,
+.prompt-editor label,
+.prompt-preset-card label,
+.ai-prompt-panel label,
+.ai-prompt-card label,
+.ai-prompt-settings label,
+.ai-prompt-editor label {
+  display: block;
+  margin: 0 0 6px;
+  color: #b7d8d5;
+}
+
+.prompt-panel select,
+.prompt-card select,
+.prompt-settings select,
+.prompt-editor select,
+.prompt-preset-card select,
+.ai-prompt-panel select,
+.ai-prompt-card select,
+.ai-prompt-settings select,
+.ai-prompt-editor select {
+  position: static !important;
+  display: block;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.prompt-panel textarea,
+.prompt-card textarea,
+.prompt-settings textarea,
+.prompt-editor textarea,
+.prompt-preset-card textarea,
+.ai-prompt-panel textarea,
+.ai-prompt-card textarea,
+.ai-prompt-settings textarea,
+.ai-prompt-editor textarea {
+  position: static !important;
+  display: block;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 150px;
+  max-height: 260px;
+  resize: vertical;
+  grid-column: 1 / -1;
+}
+
+.prep-layout,
+.ai-prep-layout,
+.dual-prep-layout,
+.prepare-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.prep-card,
+.ai-prep-card,
+.dual-prep-card,
+.prepare-card,
+.prep-section,
+.ai-prep-section,
+.dual-prep-section {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+@media (max-width: 980px) {
+  .prompt-panel,
+  .prompt-card,
+  .prompt-settings,
+  .prompt-editor,
+  .prompt-preset-card,
+  .ai-prompt-panel,
+  .ai-prompt-card,
+  .ai-prompt-settings,
+  .ai-prompt-editor {
+    grid-template-columns: 1fr;
+  }
+}
+/* Emergency repair: AI 双底色制备页布局保护
+   目的：提示词预设/文本框不能再覆盖上传区或把页面撑穿。 */
+:where(*, *::before, *::after) {
+  box-sizing: border-box;
+}
+
+:where(main, .app, .page, .panel, .card, .tab-panel, .tab-content, .ai-prep-page, .dual-prep-page) {
+  min-width: 0 !important;
+}
+
+:where(
+  .tab-panel[data-tab="ai-prep"],
+  .tab-panel.ai-prep,
+  #aiPrepPanel,
+  #aiPrepTab,
+  #aiPrep,
+  .ai-prep-page,
+  .dual-prep-page
+) {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+:where(
+  .prompt-panel,
+  .prompt-card,
+  .prompt-settings,
+  .prompt-editor,
+  .prompt-preset-card,
+  .ai-prompt-panel,
+  .ai-prompt-settings,
+  .prompt-presets,
+  .prompt-row,
+  [class*="prompt" i],
+  [id*="prompt" i],
+  [class*="preset" i],
+  [id*="preset" i]
+) {
+  position: static !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+:where(
+  .prompt-panel,
+  .prompt-card,
+  .prompt-settings,
+  .prompt-editor,
+  .prompt-preset-card,
+  .ai-prompt-panel,
+  .ai-prompt-settings,
+  .prompt-presets,
+  .prompt-row,
+  [class*="prompt" i],
+  [id*="prompt" i],
+  [class*="preset" i],
+  [id*="preset" i]
+) select,
+:where(
+  .prompt-panel,
+  .prompt-card,
+  .prompt-settings,
+  .prompt-editor,
+  .prompt-preset-card,
+  .ai-prompt-panel,
+  .ai-prompt-settings,
+  .prompt-presets,
+  .prompt-row,
+  [class*="prompt" i],
+  [id*="prompt" i],
+  [class*="preset" i],
+  [id*="preset" i]
+) textarea {
+  position: static !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+}
+
+:where(
+  .prompt-panel,
+  .prompt-card,
+  .prompt-settings,
+  .prompt-editor,
+  .prompt-preset-card,
+  .ai-prompt-panel,
+  .ai-prompt-settings,
+  .prompt-presets,
+  .prompt-row,
+  [class*="prompt" i],
+  [id*="prompt" i]
+) textarea {
+  min-height: 150px !important;
+  max-height: 280px !important;
+  resize: vertical !important;
+}
+
+:where(
+  .prompt-panel,
+  .prompt-card,
+  .prompt-settings,
+  .prompt-editor,
+  .prompt-preset-card,
+  .ai-prompt-panel,
+  .ai-prompt-settings,
+  .prompt-presets,
+  .prompt-row,
+  [class*="prompt" i],
+  [id*="prompt" i]
+) select {
+  height: 44px !important;
+}
+
+:where(.prep-layout, .ai-prep-layout, .dual-prep-layout, .prep-main, .prep-grid) {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 16px !important;
+  align-items: start !important;
+}
+
+@media (min-width: 1180px) {
+  :where(.prep-layout, .ai-prep-layout, .dual-prep-layout, .prep-main, .prep-grid) {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px) !important;
+  }
+}
+
+:where([class*="upload" i], [id*="upload" i], [class*="crop" i], [id*="crop" i], [class*="preview" i], [id*="preview" i]) {
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+:where([class*="preview" i], [id*="preview" i]) img {
+  max-width: 100% !important;
+  height: auto !important;
 }
