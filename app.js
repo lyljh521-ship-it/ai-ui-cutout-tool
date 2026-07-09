@@ -1404,13 +1404,6 @@ function makeCropBlob() {
 
 async function generateDualBackgroundFromCrop() {
   if (!cropImage) return;
-  const liblibAccessKey = els.liblibAccessKey.value.trim();
-  const liblibSecretKey = els.liblibSecretKey.value.trim();
-  if (!liblibAccessKey || !liblibSecretKey) {
-    alert("请先填写 Liblib AccessKey 和 SecretKey。");
-    return;
-  }
-
   els.generateDualBgBtn.disabled = true;
   els.generateDualBgBtn.textContent = "AI抠图中...";
 
@@ -1428,8 +1421,6 @@ async function generateDualBackgroundFromCrop() {
         width: cropRect.width,
         height: cropRect.height,
         prompt: buildCropPrompt(direction),
-        liblibAccessKey,
-        liblibSecretKey,
         modelMode: els.liblibModelMode.value,
       }),
     });
