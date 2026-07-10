@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI UI 抠图拆分工具</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=20260710-model-layout-fix" />
   </head>
   <body>
     <nav class="page-tabs">
@@ -250,7 +250,8 @@
           <label class="field">
             <span>生成模型</span>
             <select class="file-field" id="liblibModelMode">
-              <option value="img2img-ultra" selected>Liblib 图生图 Ultra</option>
+              <option value="image2" selected>Image2</option>
+              <option value="bananaPro">Nano Banana Pro</option>
             </select>
           </label>
 
@@ -278,7 +279,7 @@
     </template>
 
 <script src="./public-config.js"></script>
-<script src="./app.js?v=20260710-liblib-key-fix"></script>
+<script src="./app.js?v=20260710-model-layout-fix"></script>
 <script>
 (function () {
   function textOf(node) {

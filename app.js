@@ -605,6 +605,19 @@ function updateModelCreditCost() {
   if (label) label.textContent = `当前模型预计消耗：${selectedCost} 分/张`;
 }
 
+function setupModelChoice() {
+  if (!els.liblibModelMode) return;
+  const saved = localStorage.getItem("dualBgModelChoice") || "image2";
+  const allowed = new Set(Array.from(els.liblibModelMode.options).map((option) => option.value));
+  els.liblibModelMode.value = allowed.has(saved) ? saved : "image2";
+  localStorage.setItem("dualBgModelChoice", els.liblibModelMode.value);
+  els.liblibModelMode.addEventListener("change", () => {
+    localStorage.setItem("dualBgModelChoice", els.liblibModelMode.value);
+    updateModelCreditCost();
+    updateCropPrompt();
+  });
+}
+
 async function renderAdminPanel() {
   let panel = document.querySelector("#adminCreditPanel");
   if (panel) {
@@ -1421,7 +1434,8 @@ async function generateDualBackgroundFromCrop() {
         width: cropRect.width,
         height: cropRect.height,
         prompt: buildCropPrompt(direction),
-        modelMode: els.liblibModelMode.value,
+        modelMode: els.liblibModelMode.value || "image2",
+        modelChoice: els.liblibModelMode.value || "image2",
       }),
     });
     const result = await response.json();
@@ -2252,10 +2266,11 @@ els.sendPrepBtn.addEventListener("click", async () => {
 
 els.bgColor.addEventListener("input", processImage);
 setupAccessGate();
+setupModelChoice();
 setupLiblibKeyInputs();
 updateLabels();
 document.addEventListener("change", (event) => {
-  if (event.target?.id === "dualBgModelSelect") updateModelCreditCost();
+  if (event.target?.id === "liblibModelMode") updateModelCreditCost();
 });
 /* AI dual-bg preview and alignment hotfix.
    This block is intentionally appended so it can repair older page layouts
