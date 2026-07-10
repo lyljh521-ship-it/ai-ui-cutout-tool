@@ -1416,6 +1416,52 @@ function makeCropBlob() {
   return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
 }
 
+async function validateDualBgQuality(dataUrl, direction) {
+  const image = await loadDataUrlImage(dataUrl);
+  const width = image.naturalWidth || image.width;
+  const height = image.naturalHeight || image.height;
+  const horizontal = direction !== "vertical";
+  const halfWidth = horizontal ? Math.floor(width / 2) : width;
+  const halfHeight = horizontal ? height : Math.floor(height / 2);
+  if (halfWidth < 16 || halfHeight < 16) return { ok: false, message: "返回图尺寸异常。" };
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(image, 0, 0);
+  const first = ctx.getImageData(0, 0, halfWidth, halfHeight);
+  const second = ctx.getImageData(horizontal ? halfWidth : 0, horizontal ? 0 : halfHeight, halfWidth, halfHeight);
+  const firstStats = chromaStats(first.data);
+  const secondStats = chromaStats(second.data);
+  const firstGreen = firstStats.green >= firstStats.magenta;
+  const greenSide = firstGreen ? firstStats : secondStats;
+  const magentaSide = firstGreen ? secondStats : firstStats;
+  const wrongGreenLeak = greenSide.magenta / greenSide.total;
+  const wrongMagentaLeak = magentaSide.green / magentaSide.total;
+  const greenBg = greenSide.green / greenSide.total;
+  const magentaBg = magentaSide.magenta / magentaSide.total;
+  if (greenBg < 0.03 || magentaBg < 0.03) {
+    return { ok: false, message: "没有检测到稳定的绿色/洋红双底色。" };
+  }
+  if (wrongGreenLeak > 0.08 || wrongMagentaLeak > 0.08) {
+    return { ok: false, message: "绿色和洋红背景混到同一半图里，模型已经重绘或错位。" };
+  }
+  return { ok: true, message: "双底色基础质量通过。" };
+}
+
+function chromaStats(data) {
+  const stats = { total: data.length / 4, green: 0, magenta: 0 };
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+    if (g > 180 && r < 110 && b < 130 && g > r * 1.45 && g > b * 1.35) stats.green += 1;
+    if (r > 170 && b > 150 && g < 120 && r > g * 1.35 && b > g * 1.25) stats.magenta += 1;
+  }
+  return stats;
+}
+
 async function generateDualBackgroundFromCrop() {
   if (!cropImage) return;
   els.generateDualBgBtn.disabled = true;
@@ -1444,6 +1490,15 @@ async function generateDualBackgroundFromCrop() {
     creditCosts = result.creditCosts || creditCosts;
     updateCurrentUser(result.user);
     updateModelCreditCost();
+
+    const quality = await validateDualBgQuality(result.image, direction);
+    if (!quality.ok) {
+      if (typeof window.showAiGeneratedDualBgPreview === "function") {
+        window.showAiGeneratedDualBgPreview(result.image, `AI 返回图质量不合格：${quality.message}`);
+      }
+      alert(`AI 返回图质量不合格：${quality.message}\n\n已阻止自动拆分，请换 Image2 或修复 SillyDream 令牌额度后重新生成。`);
+      return;
+    }
 
     const file = dataUrlToFile(result.image, `${cropName}_dual_bg.png`);
     switchPage("cutout");
