@@ -447,7 +447,6 @@ setTimeout(() => {
 }, 0);
 const ACCESS_KEY = "ai_ui_cutout_access_ok";
 const AUTH_TOKEN_KEY = "ai_ui_cutout_auth_token";
-const MODEL_CHOICE_STORAGE = "dualBgModelChoiceV2";
 const LIBLIB_ACCESS_STORAGE = "ai_ui_cutout_liblib_access_key";
 const LIBLIB_SECRET_STORAGE = "ai_ui_cutout_liblib_secret_key";
 
@@ -489,8 +488,7 @@ async function setupAccessGate() {
       <p>请输入账号和密码后继续使用。</p>
       <input name="username" autocomplete="username" placeholder="用户名" />
       <input name="password" type="password" autocomplete="current-password" placeholder="密码" />
-      <button type="submit">登录</button>
-      <button class="secondary-access-button" type="button" id="registerAccountBtn">注册账号</button>
+      <button type="submit">进入网站</button>
       <span class="access-error" aria-live="polite"></span>
     </form>
   `;
@@ -499,14 +497,14 @@ async function setupAccessGate() {
   const form = gate.querySelector("form");
   const usernameInput = gate.querySelector("input[name='username']");
   const passwordInput = gate.querySelector("input[name='password']");
-  const registerButton = gate.querySelector("#registerAccountBtn");
   const error = gate.querySelector(".access-error");
   usernameInput.focus();
 
-  async function submitAccess(mode) {
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
     error.textContent = "";
     try {
-      const response = await fetch(`${apiBaseUrl()}/api/auth/${mode}`, {
+      const response = await fetch(`${apiBaseUrl()}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -520,9 +518,6 @@ async function setupAccessGate() {
       currentUser = data.user;
       creditCosts = data.creditCosts || creditCosts;
       renderAccountBar();
-      if (mode === "register") {
-        alert("注册成功。当前积分为 0，请联系管理员赠送积分后再使用 AI 抠图。");
-      }
       gate.remove();
       return;
     } catch (errorValue) {
@@ -530,16 +525,6 @@ async function setupAccessGate() {
       passwordInput.value = "";
       passwordInput.focus();
     }
-  }
-
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    await submitAccess("login");
-  });
-
-  registerButton.addEventListener("click", async (event) => {
-    event.preventDefault();
-    await submitAccess("register");
   });
 }
 
@@ -570,7 +555,7 @@ function renderAccountBar() {
     document.body.insertBefore(bar, document.body.firstChild);
   }
   const isAdmin = currentUser?.username === "admin" && currentUser?.role === "admin";
-  const selectedModel = localStorage.getItem(MODEL_CHOICE_STORAGE) || "image2";
+  const selectedModel = localStorage.getItem("dualBgModelChoice") || "image2";
   const selectedCost = creditCosts[selectedModel] || creditCosts.image2;
   bar.innerHTML = `
     <div class="account-summary">
@@ -600,23 +585,10 @@ function updateCurrentUser(user) {
 }
 
 function updateModelCreditCost() {
-  const selectedModel = localStorage.getItem(MODEL_CHOICE_STORAGE) || "image2";
+  const selectedModel = localStorage.getItem("dualBgModelChoice") || "image2";
   const selectedCost = creditCosts[selectedModel] || creditCosts.image2;
   const label = document.querySelector("#modelCreditCost");
   if (label) label.textContent = `当前模型预计消耗：${selectedCost} 分/张`;
-}
-
-function setupModelChoice() {
-  if (!els.liblibModelMode) return;
-  const saved = localStorage.getItem(MODEL_CHOICE_STORAGE) || "image2";
-  const allowed = new Set(Array.from(els.liblibModelMode.options).map((option) => option.value));
-  els.liblibModelMode.value = allowed.has(saved) ? saved : "image2";
-  localStorage.setItem(MODEL_CHOICE_STORAGE, els.liblibModelMode.value);
-  els.liblibModelMode.addEventListener("change", () => {
-    localStorage.setItem(MODEL_CHOICE_STORAGE, els.liblibModelMode.value);
-    updateModelCreditCost();
-    updateCropPrompt();
-  });
 }
 
 async function renderAdminPanel() {
@@ -1416,54 +1388,15 @@ function makeCropBlob() {
   return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
 }
 
-async function validateDualBgQuality(dataUrl, direction) {
-  const image = await loadDataUrlImage(dataUrl);
-  const width = image.naturalWidth || image.width;
-  const height = image.naturalHeight || image.height;
-  const horizontal = direction !== "vertical";
-  const halfWidth = horizontal ? Math.floor(width / 2) : width;
-  const halfHeight = horizontal ? height : Math.floor(height / 2);
-  if (halfWidth < 16 || halfHeight < 16) return { ok: false, message: "返回图尺寸异常。" };
-
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d", { willReadFrequently: true });
-  ctx.drawImage(image, 0, 0);
-  const first = ctx.getImageData(0, 0, halfWidth, halfHeight);
-  const second = ctx.getImageData(horizontal ? halfWidth : 0, horizontal ? 0 : halfHeight, halfWidth, halfHeight);
-  const firstStats = chromaStats(first.data);
-  const secondStats = chromaStats(second.data);
-  const firstGreen = firstStats.green >= firstStats.magenta;
-  const greenSide = firstGreen ? firstStats : secondStats;
-  const magentaSide = firstGreen ? secondStats : firstStats;
-  const wrongGreenLeak = greenSide.magenta / greenSide.total;
-  const wrongMagentaLeak = magentaSide.green / magentaSide.total;
-  const greenBg = greenSide.green / greenSide.total;
-  const magentaBg = magentaSide.magenta / magentaSide.total;
-  if (greenBg < 0.03 || magentaBg < 0.03) {
-    return { ok: false, message: "没有检测到稳定的绿色/洋红双底色。" };
-  }
-  if (wrongGreenLeak > 0.08 || wrongMagentaLeak > 0.08) {
-    return { ok: false, message: "绿色和洋红背景混到同一半图里，模型已经重绘或错位。" };
-  }
-  return { ok: true, message: "双底色基础质量通过。" };
-}
-
-function chromaStats(data) {
-  const stats = { total: data.length / 4, green: 0, magenta: 0 };
-  for (let i = 0; i < data.length; i += 4) {
-    const r = data[i];
-    const g = data[i + 1];
-    const b = data[i + 2];
-    if (g > 180 && r < 110 && b < 130 && g > r * 1.45 && g > b * 1.35) stats.green += 1;
-    if (r > 170 && b > 150 && g < 120 && r > g * 1.35 && b > g * 1.25) stats.magenta += 1;
-  }
-  return stats;
-}
-
 async function generateDualBackgroundFromCrop() {
   if (!cropImage) return;
+  const liblibAccessKey = els.liblibAccessKey.value.trim();
+  const liblibSecretKey = els.liblibSecretKey.value.trim();
+  if (!liblibAccessKey || !liblibSecretKey) {
+    alert("请先填写 Liblib AccessKey 和 SecretKey。");
+    return;
+  }
+
   els.generateDualBgBtn.disabled = true;
   els.generateDualBgBtn.textContent = "AI抠图中...";
 
@@ -1481,8 +1414,9 @@ async function generateDualBackgroundFromCrop() {
         width: cropRect.width,
         height: cropRect.height,
         prompt: buildCropPrompt(direction),
-        modelMode: els.liblibModelMode.value || "image2",
-        modelChoice: els.liblibModelMode.value || "image2",
+        liblibAccessKey,
+        liblibSecretKey,
+        modelMode: els.liblibModelMode.value,
       }),
     });
     const result = await response.json();
@@ -1490,24 +1424,6 @@ async function generateDualBackgroundFromCrop() {
     creditCosts = result.creditCosts || creditCosts;
     updateCurrentUser(result.user);
     updateModelCreditCost();
-
-    const selectedModel = els.liblibModelMode.value || "image2";
-    if (selectedModel !== "image2") {
-      if (typeof window.showAiGeneratedDualBgPreview === "function") {
-        window.showAiGeneratedDualBgPreview(result.image, "当前模型不是 Image2，只显示预览，不自动拆分。");
-      }
-      alert("当前模型不是 Image2，容易重绘 UI 和造成错位。已只显示预览，不自动拆分。要得到本地那种稳定效果，请修复 SillyDream 的 Image2 令牌额度后再生成。");
-      return;
-    }
-
-    const quality = await validateDualBgQuality(result.image, direction);
-    if (!quality.ok) {
-      if (typeof window.showAiGeneratedDualBgPreview === "function") {
-        window.showAiGeneratedDualBgPreview(result.image, `AI 返回图质量不合格：${quality.message}`);
-      }
-      alert(`AI 返回图质量不合格：${quality.message}\n\n已阻止自动拆分，请换 Image2 或修复 SillyDream 令牌额度后重新生成。`);
-      return;
-    }
 
     const file = dataUrlToFile(result.image, `${cropName}_dual_bg.png`);
     switchPage("cutout");
@@ -1853,8 +1769,6 @@ function imageToDataUrl(image) {
 }
 
 function apiBaseUrl() {
-  const configured = String(window.AI_UI_CUTOUT_API_BASE_URL || "").trim().replace(/\/+$/, "");
-  if (configured) return configured;
   if (location.protocol === "http:" || location.protocol === "https:") return location.origin;
   return "http://localhost:8787";
 }
@@ -2331,11 +2245,10 @@ els.sendPrepBtn.addEventListener("click", async () => {
 
 els.bgColor.addEventListener("input", processImage);
 setupAccessGate();
-setupModelChoice();
 setupLiblibKeyInputs();
 updateLabels();
 document.addEventListener("change", (event) => {
-  if (event.target?.id === "liblibModelMode") updateModelCreditCost();
+  if (event.target?.id === "dualBgModelSelect") updateModelCreditCost();
 });
 /* AI dual-bg preview and alignment hotfix.
    This block is intentionally appended so it can repair older page layouts
