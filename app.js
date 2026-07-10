@@ -1491,6 +1491,15 @@ async function generateDualBackgroundFromCrop() {
     updateCurrentUser(result.user);
     updateModelCreditCost();
 
+    const selectedModel = els.liblibModelMode.value || "image2";
+    if (selectedModel !== "image2") {
+      if (typeof window.showAiGeneratedDualBgPreview === "function") {
+        window.showAiGeneratedDualBgPreview(result.image, "当前模型不是 Image2，只显示预览，不自动拆分。");
+      }
+      alert("当前模型不是 Image2，容易重绘 UI 和造成错位。已只显示预览，不自动拆分。要得到本地那种稳定效果，请修复 SillyDream 的 Image2 令牌额度后再生成。");
+      return;
+    }
+
     const quality = await validateDualBgQuality(result.image, direction);
     if (!quality.ok) {
       if (typeof window.showAiGeneratedDualBgPreview === "function") {

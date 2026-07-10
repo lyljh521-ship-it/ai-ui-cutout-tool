@@ -1,98 +1,98 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI UI 抠图拆分工具</title>
-    <link rel="stylesheet" href="./styles.css?v=20260710-strict-image2-quality-gate" />
+    <title>AI UI 鎶犲浘鎷嗗垎宸ュ叿</title>
+    <link rel="stylesheet" href="./styles.css?v=20260710-strict-image2-quality-gate-2" />
   </head>
   <body>
     <nav class="page-tabs">
-      <button class="tab-button is-active" id="cutoutTabBtn" type="button">图素拆分</button>
-      <button class="tab-button" id="prepareTabBtn" type="button">界面抠图</button>
+      <button class="tab-button is-active" id="cutoutTabBtn" type="button">鍥剧礌鎷嗗垎</button>
+      <button class="tab-button" id="prepareTabBtn" type="button">鐣岄潰鎶犲浘</button>
     </nav>
 
     <main class="app-shell" id="cutoutPage">
       <section class="workspace">
         <header class="topbar">
           <div>
-            <h1>AI UI 抠图拆分工具</h1>
-            <p>上传UI截图，生成透明PNG。</p>
+            <h1>AI UI 鎶犲浘鎷嗗垎宸ュ叿</h1>
+            <p>涓婁紶UI鎴浘锛岀敓鎴愰€忔槑PNG銆?/p>
           </div>
           <div class="actions">
-            <button class="primary-button" id="downloadAllBtn" type="button" disabled>下载全部</button>
+            <button class="primary-button" id="downloadAllBtn" type="button" disabled>涓嬭浇鍏ㄩ儴</button>
           </div>
         </header>
 
         <section class="drop-zone" id="dropZone">
           <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" />
           <div class="drop-copy compact-drop-copy">
-            <strong>上传纯色背景 UI 图，直接拆分</strong>
-            <span>单张绿底/蓝底/白底界面可直接控件级拆分；再补第 2 张不同底色图时可更精确还原半透明颜色。</span>
+            <strong>涓婁紶绾壊鑳屾櫙 UI 鍥撅紝鐩存帴鎷嗗垎</strong>
+            <span>鍗曞紶缁垮簳/钃濆簳/鐧藉簳鐣岄潰鍙洿鎺ユ帶浠剁骇鎷嗗垎锛涘啀琛ョ 2 寮犱笉鍚屽簳鑹插浘鏃跺彲鏇寸簿纭繕鍘熷崐閫忔槑棰滆壊銆?/span>
           </div>
         </section>
 
         <section class="stage-wrap">
           <canvas id="mainCanvas" width="1280" height="720"></canvas>
-          <div class="empty-state" id="emptyState">等待上传图片</div>
+          <div class="empty-state" id="emptyState">绛夊緟涓婁紶鍥剧墖</div>
         </section>
 
         <section class="prep-panel hidden-control">
           <div class="prep-head">
             <div>
-              <h2>AI 双底色图导入</h2>
-              <p>将 AI 生成的绿底/洋红底合图上传到这里，网站会自动判断左右或上下并裁分拆解。</p>
+              <h2>AI 鍙屽簳鑹插浘瀵煎叆</h2>
+              <p>灏?AI 鐢熸垚鐨勭豢搴?娲嬬孩搴曞悎鍥句笂浼犲埌杩欓噷锛岀綉绔欎細鑷姩鍒ゆ柇宸﹀彸鎴栦笂涓嬪苟瑁佸垎鎷嗚В銆?/p>
             </div>
-            <button class="text-button" id="sendPrepBtn" type="button" disabled>送去拆分</button>
+            <button class="text-button" id="sendPrepBtn" type="button" disabled>閫佸幓鎷嗗垎</button>
           </div>
 
           <div class="prep-grid">
             <label class="prep-upload hidden-control">
               <input id="prepFileInput" type="file" accept="image/png,image/jpeg,image/webp" />
-              <span>上传复杂背景图</span>
+              <span>涓婁紶澶嶆潅鑳屾櫙鍥?/span>
             </label>
 
             <label class="prep-upload">
               <input id="pairedAutoFileInput" type="file" accept="image/png,image/jpeg,image/webp" />
-              <span>上传双底色图</span>
+              <span>涓婁紶鍙屽簳鑹插浘</span>
             </label>
 
             <label class="field hidden-control">
-              <span>换底模式</span>
+              <span>鎹㈠簳妯″紡</span>
               <select class="file-field" id="prepMode">
-                <option value="locked" selected>像素锁定</option>
-                <option value="fused">融合换底</option>
+                <option value="locked" selected>鍍忕礌閿佸畾</option>
+                <option value="fused">铻嶅悎鎹㈠簳</option>
               </select>
             </label>
 
             <label class="field hidden-control">
-              <span>背景识别 <b id="prepToleranceValue">34</b></span>
+              <span>鑳屾櫙璇嗗埆 <b id="prepToleranceValue">34</b></span>
               <input id="prepTolerance" type="range" min="8" max="120" value="34" />
             </label>
 
             <label class="field hidden-control">
-              <span>融合过渡 <b id="prepFeatherValue">42</b></span>
+              <span>铻嶅悎杩囨浮 <b id="prepFeatherValue">42</b></span>
               <input id="prepFeather" type="range" min="0" max="100" value="42" />
             </label>
           </div>
 
           <div class="ai-note">
-            <strong>推荐流程</strong>
-            <span>先用 AI 生成一张绿底/洋红底合图，再上传“上传双底色图”。大界面优先生成两张同尺寸图，或分区域生成后再合成，避免缩放压缩。</span>
+            <strong>鎺ㄨ崘娴佺▼</strong>
+            <span>鍏堢敤 AI 鐢熸垚涓€寮犵豢搴?娲嬬孩搴曞悎鍥撅紝鍐嶄笂浼犫€滀笂浼犲弻搴曡壊鍥锯€濄€傚ぇ鐣岄潰浼樺厛鐢熸垚涓ゅ紶鍚屽昂瀵稿浘锛屾垨鍒嗗尯鍩熺敓鎴愬悗鍐嶅悎鎴愶紝閬垮厤缂╂斁鍘嬬缉銆?/span>
           </div>
 
           <div class="prep-results hidden-control">
             <article class="prep-card checker">
               <canvas id="prepMaskCanvas" width="360" height="360"></canvas>
-              <span>背景识别预览</span>
+              <span>鑳屾櫙璇嗗埆棰勮</span>
             </article>
             <article class="prep-card">
               <canvas id="prepGreenCanvas" width="360" height="360"></canvas>
-              <button id="downloadPrepGreenBtn" type="button" disabled>下载绿色版</button>
+              <button id="downloadPrepGreenBtn" type="button" disabled>涓嬭浇缁胯壊鐗?/button>
             </article>
             <article class="prep-card">
               <canvas id="prepMagentaCanvas" width="360" height="360"></canvas>
-              <button id="downloadPrepMagentaBtn" type="button" disabled>下载洋红版</button>
+              <button id="downloadPrepMagentaBtn" type="button" disabled>涓嬭浇娲嬬孩鐗?/button>
             </article>
           </div>
         </section>
@@ -101,79 +101,77 @@
       <aside class="side-panel">
         <section class="control-group hidden-control">
           <div class="group-head">
-            <h2>识别设置</h2>
-            <button class="text-button" id="processBtn" type="button" disabled>重新拆分</button>
+            <h2>璇嗗埆璁剧疆</h2>
+            <button class="text-button" id="processBtn" type="button" disabled>閲嶆柊鎷嗗垎</button>
           </div>
 
           <label class="field">
-            <span>第 1 张背景颜色</span>
+            <span>绗?1 寮犺儗鏅鑹?/span>
             <div class="color-row">
               <input id="bgColor" type="color" value="#14d81a" />
-              <button id="pickBgBtn" type="button">自动识别</button>
+              <button id="pickBgBtn" type="button">鑷姩璇嗗埆</button>
             </div>
           </label>
 
           <label class="field">
-            <span>第 2 张纯色背景 UI 图</span>
+            <span>绗?2 寮犵函鑹茶儗鏅?UI 鍥?/span>
             <input class="file-field" id="secondFileInput" type="file" accept="image/png,image/jpeg,image/webp" />
           </label>
 
           <button class="primary-button wide-button" id="aiSecondBgBtn" type="button" disabled>
-            AI 生成第 2 底色并拆分
-          </button>
+            AI 鐢熸垚绗?2 搴曡壊骞舵媶鍒?          </button>
 
           <label class="field">
-            <span>第 2 张背景颜色</span>
+            <span>绗?2 寮犺儗鏅鑹?/span>
             <div class="color-row">
               <input id="secondBgColor" type="color" value="#ff00ff" />
-              <button id="pickSecondBgBtn" type="button">自动识别</button>
+              <button id="pickSecondBgBtn" type="button">鑷姩璇嗗埆</button>
             </div>
           </label>
 
-          <div class="status-line" id="solveStatus">当前：单图估算，半透明区域可能偏色</div>
+          <div class="status-line" id="solveStatus">褰撳墠锛氬崟鍥句及绠楋紝鍗婇€忔槑鍖哄煙鍙兘鍋忚壊</div>
 
           <label class="field">
-            <span>容差 <b id="toleranceValue">42</b></span>
+            <span>瀹瑰樊 <b id="toleranceValue">42</b></span>
             <input id="tolerance" type="range" min="4" max="110" value="42" />
           </label>
 
           <label class="field">
-            <span>边缘柔化 <b id="softnessValue">22</b></span>
+            <span>杈圭紭鏌斿寲 <b id="softnessValue">22</b></span>
             <input id="softness" type="range" min="0" max="80" value="22" />
           </label>
 
           <label class="field">
-            <span>去绿污染 <b id="despillValue">90</b></span>
+            <span>鍘荤豢姹℃煋 <b id="despillValue">90</b></span>
             <input id="despill" type="range" min="0" max="100" value="90" />
           </label>
 
           <label class="field">
-            <span>最小元素面积 <b id="minAreaValue">320</b></span>
+            <span>鏈€灏忓厓绱犻潰绉?<b id="minAreaValue">320</b></span>
             <input id="minArea" type="range" min="40" max="5000" value="320" />
           </label>
 
           <label class="field">
-            <span>拆分粒度</span>
+            <span>鎷嗗垎绮掑害</span>
             <select class="file-field" id="splitMode">
-              <option value="controls" selected>控件级</option>
-              <option value="parts">细图素</option>
+              <option value="controls" selected>鎺т欢绾?/option>
+              <option value="parts">缁嗗浘绱?/option>
             </select>
           </label>
 
           <label class="check-row hidden-control">
             <input id="keepShadows" type="checkbox" checked />
-            <span>保留半透明阴影和光效，并还原控件原色</span>
+            <span>淇濈暀鍗婇€忔槑闃村奖鍜屽厜鏁堬紝骞惰繕鍘熸帶浠跺師鑹?/span>
           </label>
 
           <div class="status-line hidden-control">
-            单张纯色图适合快速拆分；半透明颜色要准确，请使用左右/上下双底色图。
-          </div>
+            鍗曞紶绾壊鍥鹃€傚悎蹇€熸媶鍒嗭紱鍗婇€忔槑棰滆壊瑕佸噯纭紝璇蜂娇鐢ㄥ乏鍙?涓婁笅鍙屽簳鑹插浘銆?          </div>
         </section>
 
         <section class="control-group result-group">
           <div class="group-head">
-            <h2>拆分结果</h2>
-            <span id="countBadge">0 个</span>
+            <h2>鎷嗗垎缁撴灉</h2>
+            <span id="countBadge">0 涓?/span>
           </div>
           <div class="asset-grid" id="assetGrid"></div>
         </section>
@@ -181,16 +179,16 @@
   <section id="aiGeneratedDualBgPanel" class="ai-generated-preview-panel" hidden>
     <div class="ai-generated-preview-head">
       <div>
-        <h3>AI 生成结果预览</h3>
-        <p>先检查双底色图质量，满意后再送去拆分。</p>
+        <h3>AI 鐢熸垚缁撴灉棰勮</h3>
+        <p>鍏堟鏌ュ弻搴曡壊鍥捐川閲忥紝婊℃剰鍚庡啀閫佸幓鎷嗗垎銆?/p>
       </div>
       <div class="ai-generated-preview-actions">
-        <button type="button" id="downloadAiDualBgBtn">下载生成图</button>
-        <button type="button" id="sendAiDualBgToCutoutBtn">送去拆分</button>
+        <button type="button" id="downloadAiDualBgBtn">涓嬭浇鐢熸垚鍥?/button>
+        <button type="button" id="sendAiDualBgToCutoutBtn">閫佸幓鎷嗗垎</button>
       </div>
     </div>
     <div class="ai-generated-preview-canvas">
-      <img id="aiGeneratedDualBgImage" alt="AI 生成的双底色图预览">
+      <img id="aiGeneratedDualBgImage" alt="AI 鐢熸垚鐨勫弻搴曡壊鍥鹃瑙?>
     </div>
   </section>
 </main>
@@ -198,13 +196,13 @@
     <section class="prepare-page is-hidden" id="preparePage">
       <header class="prepare-header">
         <div>
-          <h1>界面抠图</h1>
-          <p class="hidden-control">先从大界面截图中裁出局部资源，再让 AI 生成绿底/洋红底合图，避免整张大图被压缩。</p>
+          <h1>鐣岄潰鎶犲浘</h1>
+          <p class="hidden-control">鍏堜粠澶х晫闈㈡埅鍥句腑瑁佸嚭灞€閮ㄨ祫婧愶紝鍐嶈 AI 鐢熸垚缁垮簳/娲嬬孩搴曞悎鍥撅紝閬垮厤鏁村紶澶у浘琚帇缂┿€?/p>
         </div>
         <div class="prepare-actions">
-          <button class="primary-button" id="generateDualBgBtn" type="button" disabled>AI抠图</button>
-          <button class="text-button" id="downloadCropBtn" type="button" disabled>下载裁切图</button>
-          <button class="primary-button hidden-control" id="copyPromptBtn" type="button" disabled>复制提示词</button>
+          <button class="primary-button" id="generateDualBgBtn" type="button" disabled>AI鎶犲浘</button>
+          <button class="text-button" id="downloadCropBtn" type="button" disabled>涓嬭浇瑁佸垏鍥?/button>
+          <button class="primary-button hidden-control" id="copyPromptBtn" type="button" disabled>澶嶅埗鎻愮ず璇?/button>
         </div>
       </header>
 
@@ -212,43 +210,43 @@
         <aside class="prepare-controls">
           <label class="prep-upload full crop-upload-box" id="cropUploadBox">
             <input id="cropSourceInput" type="file" accept="image/png,image/jpeg,image/webp" />
-            <span id="cropUploadText">上传大界面截图</span>
+            <span id="cropUploadText">涓婁紶澶х晫闈㈡埅鍥?/span>
             <canvas id="cropCanvas" width="1280" height="720" hidden></canvas>
-            <button class="remove-upload" id="removeCropImageBtn" type="button" hidden>×</button>
+            <button class="remove-upload" id="removeCropImageBtn" type="button" hidden>脳</button>
           </label>
 
           <label class="field">
-            <span>裁切预设</span>
+            <span>瑁佸垏棰勮</span>
             <select class="file-field" id="cropPreset">
-              <option value="512x512">512 x 512 图标/头像</option>
-              <option value="768x768">768 x 768 中型图标</option>
-              <option value="1024x512">1024 x 512 宽条特效</option>
-              <option value="1024x768" selected>1024 x 768 横向资源</option>
-              <option value="768x1024">768 x 1024 竖向资源</option>
+              <option value="512x512">512 x 512 鍥炬爣/澶村儚</option>
+              <option value="768x768">768 x 768 涓瀷鍥炬爣</option>
+              <option value="1024x512">1024 x 512 瀹芥潯鐗规晥</option>
+              <option value="1024x768" selected>1024 x 768 妯悜璧勬簮</option>
+              <option value="768x1024">768 x 1024 绔栧悜璧勬簮</option>
             </select>
           </label>
 
           <label class="field hidden-control">
-            <span>双底色排列</span>
+            <span>鍙屽簳鑹叉帓鍒?/span>
             <select class="file-field" id="pairDirection">
-              <option value="auto" selected>自动推荐</option>
-              <option value="horizontal">左右排列</option>
-              <option value="vertical">上下排列</option>
+              <option value="auto" selected>鑷姩鎺ㄨ崘</option>
+              <option value="horizontal">宸﹀彸鎺掑垪</option>
+              <option value="vertical">涓婁笅鎺掑垪</option>
             </select>
           </label>
 
           <label class="field">
             <span>Liblib AccessKey</span>
-            <input class="file-field" id="liblibAccessKey" type="password" placeholder="本地测试用，不会上传到 GitHub" />
+            <input class="file-field" id="liblibAccessKey" type="password" placeholder="鏈湴娴嬭瘯鐢紝涓嶄細涓婁紶鍒?GitHub" />
           </label>
 
           <label class="field">
             <span>Liblib SecretKey</span>
-            <input class="file-field" id="liblibSecretKey" type="password" placeholder="本地测试用，不会上传到 GitHub" />
+            <input class="file-field" id="liblibSecretKey" type="password" placeholder="鏈湴娴嬭瘯鐢紝涓嶄細涓婁紶鍒?GitHub" />
           </label>
 
           <label class="field">
-            <span>生成模型</span>
+            <span>鐢熸垚妯″瀷</span>
             <select class="file-field" id="liblibModelMode">
               <option value="image2" selected>Image2</option>
               <option value="bananaPro">Nano Banana Pro</option>
@@ -256,11 +254,11 @@
           </label>
 
           <div class="ai-note hidden-control">
-            <strong id="pairAdvice">等待上传图片</strong>
-            <span id="pairAdviceText">选择裁切区域后，这里会提示建议使用左右还是上下双底色。</span>
+            <strong id="pairAdvice">绛夊緟涓婁紶鍥剧墖</strong>
+            <span id="pairAdviceText">閫夋嫨瑁佸垏鍖哄煙鍚庯紝杩欓噷浼氭彁绀哄缓璁娇鐢ㄥ乏鍙宠繕鏄笂涓嬪弻搴曡壊銆?/span>
           </div>
 
-          <textarea class="prompt-box hidden-control" id="aiPromptText" readonly placeholder="提示词会在上传图片后自动生成"></textarea>
+          <textarea class="prompt-box hidden-control" id="aiPromptText" readonly placeholder="鎻愮ず璇嶄細鍦ㄤ笂浼犲浘鐗囧悗鑷姩鐢熸垚"></textarea>
         </aside>
 
       </section>
@@ -273,13 +271,13 @@
         </div>
         <div class="asset-meta">
           <span></span>
-          <button type="button">下载</button>
+          <button type="button">涓嬭浇</button>
         </div>
       </article>
     </template>
 
 <script src="./public-config.js"></script>
-<script src="./app.js?v=20260710-strict-image2-quality-gate"></script>
+<script src="./app.js?v=20260710-strict-image2-quality-gate-2"></script>
 <script>
 (function () {
   function textOf(node) {
@@ -290,7 +288,7 @@
     var candidates = Array.prototype.slice.call(document.querySelectorAll('body *'));
     return candidates.find(function (node) {
       var text = textOf(node);
-      return text.indexOf('图素拆分') !== -1 && text.indexOf('界面抠图') !== -1;
+      return text.indexOf('鍥剧礌鎷嗗垎') !== -1 && text.indexOf('鐣岄潰鎶犲浘') !== -1;
     });
   }
 
@@ -316,11 +314,11 @@
     if (!tabsHost) return;
 
     var sampleTab = Array.prototype.slice.call(tabsHost.querySelectorAll('button, a')).find(function (node) {
-      return textOf(node).indexOf('界面抠图') !== -1;
+      return textOf(node).indexOf('鐣岄潰鎶犲浘') !== -1;
     }) || tabsHost.querySelector('button, a');
 
     var psdTab = sampleTab ? sampleTab.cloneNode(false) : document.createElement('button');
-    psdTab.textContent = 'PSD 控件切图';
+    psdTab.textContent = 'PSD 鎺т欢鍒囧浘';
     psdTab.type = 'button';
     psdTab.href = 'javascript:void(0)';
     psdTab.dataset.localTab = 'psd-ui-slicer';
@@ -343,7 +341,7 @@
     panel.style.overflow = 'hidden';
     panel.style.background = '#071014';
     panel.style.minHeight = '760px';
-    panel.innerHTML = '<iframe title="PSD 控件切图" src="psd-ui-slicer.html?embedded=1" style="width:100%;height:820px;border:0;display:block;background:#071014"></iframe>';
+    panel.innerHTML = '<iframe title="PSD 鎺т欢鍒囧浘" src="psd-ui-slicer.html?embedded=1" style="width:100%;height:820px;border:0;display:block;background:#071014"></iframe>';
     contentHost.appendChild(panel);
 
     psdTab.addEventListener('click', function (event) {
