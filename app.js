@@ -447,6 +447,7 @@ setTimeout(() => {
 }, 0);
 const ACCESS_KEY = "ai_ui_cutout_access_ok";
 const AUTH_TOKEN_KEY = "ai_ui_cutout_auth_token";
+const MODEL_CHOICE_STORAGE = "dualBgModelChoiceV2";
 const LIBLIB_ACCESS_STORAGE = "ai_ui_cutout_liblib_access_key";
 const LIBLIB_SECRET_STORAGE = "ai_ui_cutout_liblib_secret_key";
 
@@ -569,7 +570,7 @@ function renderAccountBar() {
     document.body.insertBefore(bar, document.body.firstChild);
   }
   const isAdmin = currentUser?.username === "admin" && currentUser?.role === "admin";
-  const selectedModel = localStorage.getItem("dualBgModelChoice") || "image2";
+  const selectedModel = localStorage.getItem(MODEL_CHOICE_STORAGE) || "image2";
   const selectedCost = creditCosts[selectedModel] || creditCosts.image2;
   bar.innerHTML = `
     <div class="account-summary">
@@ -599,7 +600,7 @@ function updateCurrentUser(user) {
 }
 
 function updateModelCreditCost() {
-  const selectedModel = localStorage.getItem("dualBgModelChoice") || "image2";
+  const selectedModel = localStorage.getItem(MODEL_CHOICE_STORAGE) || "image2";
   const selectedCost = creditCosts[selectedModel] || creditCosts.image2;
   const label = document.querySelector("#modelCreditCost");
   if (label) label.textContent = `当前模型预计消耗：${selectedCost} 分/张`;
@@ -607,12 +608,12 @@ function updateModelCreditCost() {
 
 function setupModelChoice() {
   if (!els.liblibModelMode) return;
-  const saved = localStorage.getItem("dualBgModelChoice") || "image2";
+  const saved = localStorage.getItem(MODEL_CHOICE_STORAGE) || "image2";
   const allowed = new Set(Array.from(els.liblibModelMode.options).map((option) => option.value));
   els.liblibModelMode.value = allowed.has(saved) ? saved : "image2";
-  localStorage.setItem("dualBgModelChoice", els.liblibModelMode.value);
+  localStorage.setItem(MODEL_CHOICE_STORAGE, els.liblibModelMode.value);
   els.liblibModelMode.addEventListener("change", () => {
-    localStorage.setItem("dualBgModelChoice", els.liblibModelMode.value);
+    localStorage.setItem(MODEL_CHOICE_STORAGE, els.liblibModelMode.value);
     updateModelCreditCost();
     updateCropPrompt();
   });
