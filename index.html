@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI UI 抠图拆分工具</title>
-    <link rel="stylesheet" href="./styles.css?v=restore-20260720-keyless-2" />
+    <link rel="stylesheet" href="./styles.css?v=restore-20260720-clean-open" />
   </head>
   <body>
     <nav class="page-tabs">
@@ -278,103 +278,6 @@
       </article>
     </template>
 
-<script src="./app.js?v=restore-20260720-keyless-2"></script>
-<script>
-(function () {
-  function textOf(node) {
-    return (node && node.textContent || '').replace(/\s+/g, '');
-  }
-
-  function findTabsHost() {
-    var candidates = Array.prototype.slice.call(document.querySelectorAll('body *'));
-    return candidates.find(function (node) {
-      var text = textOf(node);
-      return text.indexOf('图素拆分') !== -1 && text.indexOf('界面抠图') !== -1;
-    });
-  }
-
-  function findContentHost(tabsHost) {
-    var current = tabsHost;
-    while (current && current.parentElement && current.parentElement !== document.body) {
-      current = current.parentElement;
-      if (current.nextElementSibling) return current.parentElement;
-    }
-    return document.body;
-  }
-
-  function setActive(tab) {
-    Array.prototype.slice.call(document.querySelectorAll('[data-local-tab]')).forEach(function (item) {
-      item.classList.toggle('active', item === tab);
-      item.setAttribute('aria-selected', item === tab ? 'true' : 'false');
-    });
-  }
-
-  function mountPsdTab() {
-    if (document.querySelector('[data-local-tab="psd-ui-slicer"]')) return;
-    var tabsHost = findTabsHost();
-    if (!tabsHost) return;
-
-    var sampleTab = Array.prototype.slice.call(tabsHost.querySelectorAll('button, a')).find(function (node) {
-      return textOf(node).indexOf('界面抠图') !== -1;
-    }) || tabsHost.querySelector('button, a');
-
-    var psdTab = sampleTab ? sampleTab.cloneNode(false) : document.createElement('button');
-    psdTab.textContent = 'PSD 控件切图';
-    psdTab.type = 'button';
-    psdTab.href = 'javascript:void(0)';
-    psdTab.dataset.localTab = 'psd-ui-slicer';
-    psdTab.setAttribute('role', 'tab');
-    psdTab.setAttribute('aria-selected', 'false');
-    psdTab.style.marginLeft = '10px';
-    tabsHost.appendChild(psdTab);
-
-    var contentHost = findContentHost(tabsHost);
-    var originalNodes = Array.prototype.slice.call(contentHost.children).filter(function (child) {
-      return child !== tabsHost && child !== tabsHost.parentElement && !child.hasAttribute('data-psd-panel');
-    });
-
-    var panel = document.createElement('section');
-    panel.dataset.psdPanel = 'true';
-    panel.style.display = 'none';
-    panel.style.marginTop = '14px';
-    panel.style.border = '1px solid #1e3a43';
-    panel.style.borderRadius = '8px';
-    panel.style.overflow = 'hidden';
-    panel.style.background = '#071014';
-    panel.style.minHeight = '760px';
-    panel.innerHTML = '<iframe title="PSD 控件切图" src="psd-ui-slicer.html?embedded=1" style="width:100%;height:820px;border:0;display:block;background:#071014"></iframe>';
-    contentHost.appendChild(panel);
-
-    psdTab.addEventListener('click', function (event) {
-      event.preventDefault();
-      setActive(psdTab);
-      originalNodes.forEach(function (node) { node.style.display = 'none'; });
-      panel.style.display = 'block';
-    });
-
-    Array.prototype.slice.call(tabsHost.querySelectorAll('button, a')).forEach(function (tab) {
-      if (tab === psdTab) return;
-      tab.dataset.localTab = tab.dataset.localTab || 'original';
-      tab.addEventListener('click', function () {
-        panel.style.display = 'none';
-        originalNodes.forEach(function (node) { node.style.display = ''; });
-        setActive(tab);
-      });
-    });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', mountPsdTab);
-  } else {
-    mountPsdTab();
-  }
-})();
-</script>
-  <script src="chroma-cleanup-experiment.js?v=20260611-1"></script>
-  <script src="model-switch.js?v=20260612-2"></script>
-  <script src="upload-reset-stable.js?v=20260612-1"></script>
-<script src="zoom-stage-fix.js?v=20260616-stable1"></script>
-  <script src="crop-drag-sync-fix.js?v=20260616-5"></script>
-<script src="chroma-damage-repair.js?v=20260616-1"></script>
+<script src="./app.js?v=restore-20260720-clean-open"></script>
 </body>
 </html>
