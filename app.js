@@ -787,11 +787,45 @@ function isLikelyPairedChromaImage(image) {
   const sampleCtx = canvas.getContext("2d", { willReadFrequently: true });
   sampleCtx.drawImage(image, 0, 0);
   const data = sampleCtx.getImageData(0, 0, width, height).data;
+  const leftStats = chromaRegionStats(data, width, 0, 0, Math.floor(width / 2), height);
+  const rightStats = chromaRegionStats(data, width, Math.floor(width / 2), 0, Math.floor(width / 2), height);
+  const topStats = chromaRegionStats(data, width, 0, 0, width, Math.floor(height / 2));
+  const bottomStats = chromaRegionStats(data, width, 0, Math.floor(height / 2), width, Math.floor(height / 2));
+  const horizontalChroma =
+    (leftStats.green > 0.12 && rightStats.magenta > 0.12) ||
+    (leftStats.magenta > 0.12 && rightStats.green > 0.12);
+  const verticalChroma =
+    (topStats.green > 0.12 && bottomStats.magenta > 0.12) ||
+    (topStats.magenta > 0.12 && bottomStats.green > 0.12);
+  if (horizontalChroma || verticalChroma) return true;
   const left = sampleRegion(data, width, 0, 0, Math.floor(width / 2), height);
   const right = sampleRegion(data, width, Math.floor(width / 2), 0, Math.floor(width / 2), height);
   const top = sampleRegion(data, width, 0, 0, width, Math.floor(height / 2));
   const bottom = sampleRegion(data, width, 0, Math.floor(height / 2), width, Math.floor(height / 2));
   return pairColorScore(left, right) > 2.8 || pairColorScore(top, bottom) > 2.8;
+}
+
+function chromaRegionStats(data, imageWidth, startX, startY, width, height) {
+  const stepX = Math.max(1, Math.floor(width / 96));
+  const stepY = Math.max(1, Math.floor(height / 96));
+  let total = 0;
+  let green = 0;
+  let magenta = 0;
+  for (let y = startY; y < startY + height; y += stepY) {
+    for (let x = startX; x < startX + width; x += stepX) {
+      const i = (y * imageWidth + x) * 4;
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      const a = data[i + 3];
+      if (a <= 10) continue;
+      total += 1;
+      if (g > 170 && r < 130 && b < 150 && g > r * 1.35 && g > b * 1.25) green += 1;
+      if (r > 170 && b > 150 && g < 140 && r > g * 1.25 && b > g * 1.15) magenta += 1;
+    }
+  }
+  total = Math.max(1, total);
+  return { green: green / total, magenta: magenta / total };
 }
 
 function loadSecondImageFromFile(file) {
