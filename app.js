@@ -768,9 +768,30 @@ function loadImageFromFile(file) {
   const image = new Image();
   image.onload = () => {
     URL.revokeObjectURL(url);
+    if (isLikelyPairedChromaImage(image)) {
+      loadPairedAutoImageFromFile(file);
+      return;
+    }
     setSource(image);
   };
   image.src = url;
+}
+
+function isLikelyPairedChromaImage(image) {
+  const width = image.naturalWidth || image.width;
+  const height = image.naturalHeight || image.height;
+  if (width < 32 || height < 32) return false;
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const sampleCtx = canvas.getContext("2d", { willReadFrequently: true });
+  sampleCtx.drawImage(image, 0, 0);
+  const data = sampleCtx.getImageData(0, 0, width, height).data;
+  const left = sampleRegion(data, width, 0, 0, Math.floor(width / 2), height);
+  const right = sampleRegion(data, width, Math.floor(width / 2), 0, Math.floor(width / 2), height);
+  const top = sampleRegion(data, width, 0, 0, width, Math.floor(height / 2));
+  const bottom = sampleRegion(data, width, 0, Math.floor(height / 2), width, Math.floor(height / 2));
+  return pairColorScore(left, right) > 2.8 || pairColorScore(top, bottom) > 2.8;
 }
 
 function loadSecondImageFromFile(file) {
