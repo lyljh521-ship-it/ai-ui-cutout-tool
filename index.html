@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI UI 抠图拆分工具</title>
-    <link rel="stylesheet" href="./styles.css?v=restore-20260710-local" />
+    <link rel="stylesheet" href="./styles.css?v=restore-20260720-keyless-2" />
   </head>
   <body>
     <nav class="page-tabs">
@@ -237,12 +237,12 @@
             </select>
           </label>
 
-          <label class="field">
+          <label class="field hidden-control">
             <span>Liblib AccessKey</span>
             <input class="file-field" id="liblibAccessKey" type="password" placeholder="本地测试用，不会上传到 GitHub" />
           </label>
 
-          <label class="field">
+          <label class="field hidden-control">
             <span>Liblib SecretKey</span>
             <input class="file-field" id="liblibSecretKey" type="password" placeholder="本地测试用，不会上传到 GitHub" />
           </label>
@@ -250,7 +250,8 @@
           <label class="field">
             <span>生成模型</span>
             <select class="file-field" id="liblibModelMode">
-              <option value="img2img-ultra" selected>Liblib 图生图 Ultra</option>
+              <option value="image2" selected>Image2</option>
+              <option value="bananaPro">Nano Banana Pro</option>
             </select>
           </label>
 
@@ -277,7 +278,7 @@
       </article>
     </template>
 
-<script src="./app.js?v=restore-20260710-local"></script>
+<script src="./app.js?v=restore-20260720-keyless-2"></script>
 <script>
 (function () {
   function textOf(node) {

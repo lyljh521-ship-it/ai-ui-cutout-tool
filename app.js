@@ -449,6 +449,7 @@ const ACCESS_KEY = "ai_ui_cutout_access_ok";
 const AUTH_TOKEN_KEY = "ai_ui_cutout_auth_token";
 const LIBLIB_ACCESS_STORAGE = "ai_ui_cutout_liblib_access_key";
 const LIBLIB_SECRET_STORAGE = "ai_ui_cutout_liblib_secret_key";
+const MODEL_CHOICE_STORAGE = "dualBgModelChoice";
 
 const ctx = els.mainCanvas.getContext("2d", { willReadFrequently: true });
 let sourceImage = null;
@@ -463,6 +464,14 @@ let cropRect = { x: 0, y: 0, width: 1024, height: 768 };
 let cropDrag = null;
 let currentUser = null;
 let creditCosts = { image2: 12, bananaPro: 18, liblib: 10 };
+
+function currentModelChoice() {
+  const allowed = new Set(["image2", "bananaPro"]);
+  const saved = localStorage.getItem(MODEL_CHOICE_STORAGE);
+  if (allowed.has(saved)) return saved;
+  localStorage.setItem(MODEL_CHOICE_STORAGE, "image2");
+  return "image2";
+}
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
@@ -555,7 +564,7 @@ function renderAccountBar() {
     document.body.insertBefore(bar, document.body.firstChild);
   }
   const isAdmin = currentUser?.username === "admin" && currentUser?.role === "admin";
-  const selectedModel = localStorage.getItem("dualBgModelChoice") || "image2";
+  const selectedModel = currentModelChoice();
   const selectedCost = creditCosts[selectedModel] || creditCosts.image2;
   bar.innerHTML = `
     <div class="account-summary">
@@ -585,10 +594,21 @@ function updateCurrentUser(user) {
 }
 
 function updateModelCreditCost() {
-  const selectedModel = localStorage.getItem("dualBgModelChoice") || "image2";
+  const selectedModel = currentModelChoice();
   const selectedCost = creditCosts[selectedModel] || creditCosts.image2;
   const label = document.querySelector("#modelCreditCost");
   if (label) label.textContent = `当前模型预计消耗：${selectedCost} 分/张`;
+}
+
+function setupModelChoice() {
+  if (!els.liblibModelMode) return;
+  els.liblibModelMode.value = currentModelChoice();
+  els.liblibModelMode.addEventListener("change", () => {
+    const value = els.liblibModelMode.value === "bananaPro" ? "bananaPro" : "image2";
+    localStorage.setItem(MODEL_CHOICE_STORAGE, value);
+    els.liblibModelMode.value = value;
+    updateModelCreditCost();
+  });
 }
 
 async function renderAdminPanel() {
@@ -1390,13 +1410,6 @@ function makeCropBlob() {
 
 async function generateDualBackgroundFromCrop() {
   if (!cropImage) return;
-  const liblibAccessKey = els.liblibAccessKey.value.trim();
-  const liblibSecretKey = els.liblibSecretKey.value.trim();
-  if (!liblibAccessKey || !liblibSecretKey) {
-    alert("请先填写 Liblib AccessKey 和 SecretKey。");
-    return;
-  }
-
   els.generateDualBgBtn.disabled = true;
   els.generateDualBgBtn.textContent = "AI抠图中...";
 
@@ -1414,9 +1427,8 @@ async function generateDualBackgroundFromCrop() {
         width: cropRect.width,
         height: cropRect.height,
         prompt: buildCropPrompt(direction),
-        liblibAccessKey,
-        liblibSecretKey,
-        modelMode: els.liblibModelMode.value,
+        modelMode: currentModelChoice(),
+        modelChoice: currentModelChoice(),
       }),
     });
     const result = await response.json();
@@ -2246,9 +2258,10 @@ els.sendPrepBtn.addEventListener("click", async () => {
 els.bgColor.addEventListener("input", processImage);
 setupAccessGate();
 setupLiblibKeyInputs();
+setupModelChoice();
 updateLabels();
 document.addEventListener("change", (event) => {
-  if (event.target?.id === "dualBgModelSelect") updateModelCreditCost();
+  if (event.target?.id === "dualBgModelSelect" || event.target?.id === "liblibModelMode") updateModelCreditCost();
 });
 /* AI dual-bg preview and alignment hotfix.
    This block is intentionally appended so it can repair older page layouts
