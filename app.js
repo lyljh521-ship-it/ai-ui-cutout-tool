@@ -75,7 +75,7 @@ function forceInstallAiPreviewPanel() {
       <div class="ai-generated-preview-head">
         <div>
           <h3>AI 生成结果预览</h3>
-          <p>这里会显示 AI 返回的双底色图，可下载、自动对齐，或送去拆分。</p>
+          <p>这里会显示 AI 返回图。Banana Pro 可能重绘位置，建议先预览确认，再送去拆分。</p>
         </div>
         <div class="ai-generated-preview-actions">
           <button type="button" id="alignAiDualBgBtn">自动对齐</button>
@@ -121,7 +121,7 @@ function showAiGeneratedDualBgPreview(imageLike) {
       <div class="ai-generated-preview-head">
         <div>
           <h3>AI 生成结果预览</h3>
-          <p>先检查双底色图质量，满意后再手动送去拆分。</p>
+          <p>先检查返回图质量，满意后再手动送去拆分。</p>
         </div>
         <div class="ai-generated-preview-actions">
           <button type="button" id="downloadAiDualBgBtn">下载生成图</button>
@@ -159,7 +159,7 @@ function ensureAiPreviewPanelInActivePage() {
       <div class="ai-generated-preview-head">
         <div>
           <h3>AI 生成结果预览</h3>
-          <p>先检查双底色图质量；有重影时先自动对齐，再送去拆分。</p>
+          <p>先检查返回图质量；有重影时先自动对齐，再送去拆分。</p>
         </div>
         <div class="ai-generated-preview-actions">
           <button type="button" id="alignAiDualBgBtn">自动对齐</button>
@@ -466,9 +466,8 @@ let currentUser = null;
 let creditCosts = { image2: 12, bananaPro: 18, liblib: 10 };
 
 function currentModelChoice() {
-  const allowed = new Set(["image2", "bananaPro"]);
   const saved = localStorage.getItem(MODEL_CHOICE_STORAGE);
-  if (allowed.has(saved)) return saved;
+  if (saved === "image2" || saved === "bananaPro") return saved;
   localStorage.setItem(MODEL_CHOICE_STORAGE, "image2");
   return "image2";
 }
@@ -1473,6 +1472,7 @@ async function generateDualBackgroundFromCrop() {
     const cropBlob = await makeCropBlob();
     const cropDataUrl = await blobToDataUrl(cropBlob);
     const direction = recommendedPairDirection();
+    const modelChoice = currentModelChoice();
     const response = await fetch(`${apiBaseUrl()}/api/image2/generate-dual-bg`, {
       method: "POST",
       headers: authHeaders({ "Content-Type": "application/json" }),
@@ -1482,8 +1482,8 @@ async function generateDualBackgroundFromCrop() {
         width: cropRect.width,
         height: cropRect.height,
         prompt: buildCropPrompt(direction),
-        modelMode: currentModelChoice(),
-        modelChoice: currentModelChoice(),
+        modelMode: modelChoice,
+        modelChoice,
       }),
     });
     const result = await response.json();
@@ -1491,6 +1491,11 @@ async function generateDualBackgroundFromCrop() {
     creditCosts = result.creditCosts || creditCosts;
     updateCurrentUser(result.user);
     updateModelCreditCost();
+
+    if (modelChoice === "bananaPro") {
+      showAiGeneratedDualBgPreview(result.image);
+      return;
+    }
 
     const file = dataUrlToFile(result.image, `${cropName}_dual_bg.png`);
     switchPage("cutout");
