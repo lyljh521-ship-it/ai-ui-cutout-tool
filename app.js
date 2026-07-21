@@ -1443,12 +1443,23 @@ function updateCropTools() {
 
 function buildCropPrompt(direction) {
   const directionText = direction === "horizontal" ? "左右排列" : "上下排列";
-  const firstText = direction === "horizontal" ? "左半边" : "上半边";
-  const secondText = direction === "horizontal" ? "右半边" : "下半边";
+  const sourceWidth = Math.round(cropRect.width);
+  const sourceHeight = Math.round(cropRect.height);
+  const outputWidth = direction === "horizontal" ? sourceWidth * 2 : sourceWidth;
+  const outputHeight = direction === "horizontal" ? sourceHeight : sourceHeight * 2;
+  const firstText = direction === "horizontal"
+    ? `左半边必须是一张完整的 ${sourceWidth} x ${sourceHeight} 原图副本，背景为纯绿色 #00FF00`
+    : `上半边必须是一张完整的 ${sourceWidth} x ${sourceHeight} 原图副本，背景为纯绿色 #00FF00`;
+  const secondText = direction === "horizontal"
+    ? `右半边必须是一张完整的 ${sourceWidth} x ${sourceHeight} 原图副本，背景为纯洋红色 #FF00FF`
+    : `下半边必须是一张完整的 ${sourceWidth} x ${sourceHeight} 原图副本，背景为纯洋红色 #FF00FF`;
   return [
-    `请将我上传的这张裁切图处理成一张${directionText}的双底色图。`,
-    `${firstText}背景改成纯绿色 #00FF00，${secondText}背景改成纯洋红色 #FF00FF。`,
-    "两边的 UI 元素、文字、图标、光效、阴影、大小、位置、比例、裁切范围必须尽量完全一致。",
+    `请将我上传的裁切图处理成一张${directionText}双底色图，最终输出尺寸必须是 ${outputWidth} x ${outputHeight}。`,
+    `${firstText}。`,
+    `${secondText}。`,
+    "注意：不是把同一张图的局部区域分别涂成绿色和洋红色，而是生成两张完整、同尺寸、像素位置一致的原图副本再拼接。",
+    "两张副本中的 UI 元素、文字、图标、光效、阴影、大小、位置、比例、裁切范围必须完全一致。",
+    "纯绿色/纯洋红色必须填满各自整张副本的背景区域，不能只填局部色块。",
     "不要压缩 UI 元素，不要改变 UI 元素样式，不要新增内容，不要删除内容，只替换背景颜色。",
     "两块区域尺寸必须完全一致，方便后续从中间一刀裁开做双底色抠图。",
   ].join("\n");
@@ -1460,6 +1471,17 @@ function makeCropBlob() {
   canvas.height = cropRect.height;
   canvas.getContext("2d").drawImage(cropImage, cropRect.x, cropRect.y, cropRect.width, cropRect.height, 0, 0, cropRect.width, cropRect.height);
   return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+}
+
+async function assertAiDualBgOutputSize(dataUrl, direction) {
+  const image = await loadDataUrlImage(dataUrl);
+  const expectedWidth = direction === "horizontal" ? cropRect.width * 2 : cropRect.width;
+  const expectedHeight = direction === "horizontal" ? cropRect.height : cropRect.height * 2;
+  const actualWidth = image.naturalWidth || image.width;
+  const actualHeight = image.naturalHeight || image.height;
+  if (Math.abs(actualWidth - expectedWidth) <= 4 && Math.abs(actualHeight - expectedHeight) <= 4) return;
+  const directionText = direction === "horizontal" ? "左右排列" : "上下排列";
+  throw new Error(`AI 返回图尺寸不符合${directionText}双底色标准：当前 ${actualWidth} x ${actualHeight}，应为 ${expectedWidth} x ${expectedHeight}。请重新生成，或缩小裁切区域后再试。`);
 }
 
 async function generateDualBackgroundFromCrop() {
@@ -1491,6 +1513,7 @@ async function generateDualBackgroundFromCrop() {
     creditCosts = result.creditCosts || creditCosts;
     updateCurrentUser(result.user);
     updateModelCreditCost();
+    await assertAiDualBgOutputSize(result.image, direction);
 
     if (modelChoice === "bananaPro") {
       showAiGeneratedDualBgPreview(result.image);
